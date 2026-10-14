@@ -13,7 +13,11 @@
     public string Role { get; set; }
 
 
-    public UserModel(Int64 id, string email, string password, string fullname,string phone,string date)
+
+    public UserModel() { }
+
+
+    public UserModel(Int64 id, string email, string password, string fullname,string phone,string date,string role)
     {
         Id = id;
         EmailAddress = email;
@@ -21,7 +25,7 @@
         FullName = fullname;
         PhoneNumber = phone;
         DateOfBirth = date;
-        Role = "User";
+        Role = role;
     }
 
 
