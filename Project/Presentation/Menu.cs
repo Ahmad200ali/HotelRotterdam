@@ -1,22 +1,21 @@
 static class Menu
-{
-
-    //This shows the menu. You can call back to this method to show the menu again
-    //after another presentation method is completed.
-    //You could edit this to show different menus depending on the user's role
+{  
     static public void Start()
     {
+        Console.Clear();
         Console.WriteLine("Enter 1 to login");
-        Console.WriteLine("Enter 2 to do something else in the future");
+        Console.WriteLine("Enter 2 to make account");
 
         string input = Console.ReadLine();
         if (input == "1")
         {
+            Console.Clear();
             UserLogin.Start();
         }
         else if (input == "2")
         {
-            Console.WriteLine("This feature is not yet implemented");
+            Console.Clear();
+            UserRegister.Start();
         }
         else
         {
