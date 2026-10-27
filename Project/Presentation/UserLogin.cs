@@ -38,19 +38,9 @@ static class UserLogin
                         break;
                 }
                 Console.ReadKey();
-
+                return;
             }
-            Console.Clear();
-            Console.ForegroundColor = ConsoleColor.DarkGreen;
-            Console.WriteLine("Welcome " + acc.FullName);
-            Console.WriteLine("Your email is " + acc.EmailAddress);
-            Console.ResetColor();
-            Console.ForegroundColor = ConsoleColor.DarkRed;
-
-            Console.WriteLine("Press Any Key to Logout");
-            Console.ResetColor();
-            Console.ReadKey();
-            Menu.Start();
+            GuestMenu.Start(acc);
 
         }
         else
