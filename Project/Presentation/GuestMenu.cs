@@ -9,6 +9,7 @@ public static class GuestMenu
             Console.Clear();
             Console.WriteLine($"Welcome, {guest.FullName}");
             Console.WriteLine("1. View the hotel floor plan");
+            Console.WriteLine("2. View the Menu Dishs");
             Console.WriteLine("0. Log out");
             Console.Write("Choose an option: ");
 
@@ -16,6 +17,11 @@ public static class GuestMenu
             {
                 case "1":
                     ShowFloorPlan();
+                    Console.WriteLine("\nPress any key to return to the guest menu.");
+                    Console.ReadKey();
+                    break;
+                case "2":
+                    MenuManagement.ListDishes();
                     Console.WriteLine("\nPress any key to return to the guest menu.");
                     Console.ReadKey();
                     break;
