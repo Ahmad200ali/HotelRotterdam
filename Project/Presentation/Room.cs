@@ -52,10 +52,6 @@ static class Room
 
                 case "0":
                     running = false;
-                    Console.WriteLine("See you soon");
-                    Console.WriteLine();
-                    Menu.Start();
-                    Console.ReadKey();
                     break;
 
                 default:

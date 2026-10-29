@@ -13,31 +13,7 @@ static class UserLogin
         {
             if (acc.Role == "ADMIN")
             {
-                Console.WriteLine($"Welcome {acc.FullName} you are Admin");
-                Console.WriteLine("Please Enter A valid Choies");
-                Console.WriteLine("press 1 To Go ROOM MANAGEMENT DASHBOARD");
-                Console.WriteLine("press 2 add a emploee");
-                
-                int result = Convert.ToInt32(Console.ReadLine());
-                switch (result)
-                {
-                    case 1:
-                        Room.Start();
-                        break;
-                    case 2:
-                        Console.WriteLine($"inn the development Mode");
-                        break;
-                    case 3:
-                        Console.WriteLine($"inn the development Mode");
-                        break;
-                    case 4:
-                        Console.WriteLine($"inn the development Mode");
-                        break;
-                    default:
-                        Console.WriteLine("done!");
-                        break;
-                }
-                Console.ReadKey();
+                AdminMenu.Start(acc);
                 return;
             }
             GuestMenu.Start(acc);
