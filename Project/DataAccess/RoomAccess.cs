@@ -48,5 +48,10 @@ public class RoomAccess
 
         return rowsAffected > 0;
     }
+    public List<RoomModel> GetAllRooms()
+    {
+        string sql = $"SELECT * FROM {Table}";
 
+        return _connection.Query<RoomModel>(sql).ToList();
+    }
 }

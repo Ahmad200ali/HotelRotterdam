@@ -10,6 +10,7 @@ public static class GuestMenu
             Console.WriteLine($"Welcome, {guest.FullName}");
             Console.WriteLine("1. View the hotel floor plan");
             Console.WriteLine("2. View the Menu Dishs");
+            Console.WriteLine("3. Create reservation");
             Console.WriteLine("0. Log out");
             Console.Write("Choose an option: ");
 
@@ -24,6 +25,10 @@ public static class GuestMenu
                     MenuManagement.ListDishes();
                     Console.WriteLine("\nPress any key to return to the guest menu.");
                     Console.ReadKey();
+                    break;
+                case "3":
+                    Console.Clear();
+                    HotelReservationMenu.Start(guest);
                     break;
                 case "0":
                     loggedIn = false;
