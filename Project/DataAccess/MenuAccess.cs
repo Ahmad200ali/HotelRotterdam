@@ -6,6 +6,7 @@ public class MenuAccess
     private SqliteConnection _connection = new SqliteConnection($"Data Source=DataSources/project.db");
 
     private string Table = "Menu";
+
     public void Write(MenuModel Menu)
     {
         string sql = $"INSERT INTO {Table} (name, type,description,price) VALUES (@Name, @Type, @Description,@Price)";
@@ -23,6 +24,12 @@ public class MenuAccess
         return _connection.Query<MenuModel>(sql).AsList();
     }
 
+    public List<MenuModel> GetAvailable()
+    {
+        string sql = $"SELECT * FROM {Table} WHERE IsAvailable = 1 ORDER BY id";
+        return _connection.Query<MenuModel>(sql).AsList();
+    }
+
     public void UpdateMenu(MenuModel Menu)
     {
         string sql = $@"
@@ -30,7 +37,8 @@ public class MenuAccess
         SET name = @Name,
             type = @Type,
             description = @Description,
-            price = @Price
+            price = @Price,
+            IsAvailable = @IsAvailable
         WHERE id = @Id";
 
         _connection.Execute(sql, new
@@ -39,6 +47,7 @@ public class MenuAccess
             Type = Menu.Type,
             Description = Menu.Description,
             Price = Menu.Price,
+            IsAvailable = Menu.IsAvailable,
             Id = Menu.ID
         });
     }

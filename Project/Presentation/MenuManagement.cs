@@ -64,6 +64,23 @@ public static class MenuManagement
             PrintDish(dish);
     }
 
+    public static void ListAvailableDishes()
+    {
+        Console.Clear();
+        Console.WriteLine("AVAILABLE MENU DISHES\n");
+        List<MenuModel> dishes = menuLogic.GetAvailableMenus();
+        if (dishes.Count == 0)
+        {
+            Console.WriteLine("There are currently no available dishes.");
+            return;
+        }
+
+        foreach (MenuModel dish in dishes)
+        {
+            Console.WriteLine($"{dish.Name} | {dish.Price:C}");
+        }
+    }
+
     private static void UpdateDish()
     {
         Console.Clear();
@@ -76,6 +93,15 @@ public static class MenuManagement
         string type = Console.ReadLine()?.Trim() ?? "";
         Console.WriteLine($"Description [{dish.Description}]: ");
         string description = Console.ReadLine()?.Trim() ?? "";
+        Console.WriteLine($"Available [{(dish.IsAvailable ? "y" : "n")}]? (y/n, Enter to keep current): ");
+        string availabilityInput = Console.ReadLine()?.Trim() ?? "";
+        if (!string.IsNullOrEmpty(availabilityInput) &&
+            !availabilityInput.Equals("y", StringComparison.OrdinalIgnoreCase) &&
+            !availabilityInput.Equals("n", StringComparison.OrdinalIgnoreCase))
+        {
+            ShowMessage("Enter y or n to set availability.", false);
+            return;
+        }
         Console.WriteLine($"Price [{dish.Price}]: ");
         string priceInput = Console.ReadLine() ?? "";
         double price = dish.Price;
@@ -86,11 +112,14 @@ public static class MenuManagement
             return;
         }
 
-        bool result = menuLogic.UpdateMenu(dish.ID,
-            string.IsNullOrWhiteSpace(name) ? dish.Name : name,
-            string.IsNullOrWhiteSpace(type) ? dish.Type : type,
-            string.IsNullOrWhiteSpace(description) ? dish.Description : description,
-            price);
+        dish.Name = string.IsNullOrWhiteSpace(name) ? dish.Name : name;
+        dish.Type = string.IsNullOrWhiteSpace(type) ? dish.Type : type;
+        dish.Description = string.IsNullOrWhiteSpace(description) ? dish.Description : description;
+        dish.Price = price;
+        if (!string.IsNullOrWhiteSpace(availabilityInput))
+            dish.IsAvailable = availabilityInput.Equals("y", StringComparison.OrdinalIgnoreCase);
+
+        bool result = menuLogic.UpdateMenu(dish);
         ShowMessage(result ? "Dish updated successfully!" : "Failed to update dish!", result);
     }
 
@@ -128,7 +157,7 @@ public static class MenuManagement
 
     private static void PrintDish(MenuModel dish)
     {
-        Console.WriteLine($"\nID: {dish.ID} | {dish.Name} | {dish.Type} | {dish.Price:C}");
+        Console.WriteLine($"\nID: {dish.ID} | {dish.Name} | {dish.Type} | {dish.Price:C} | {(dish.IsAvailable ? "Available" : "Unavailable")}");
         Console.WriteLine(dish.Description);
     }
 

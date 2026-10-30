@@ -36,6 +36,8 @@ public class MenuLogic
 
     public List<MenuModel> GetAllMenus() => _access.GetAll();
 
+    public List<MenuModel> GetAvailableMenus() => _access.GetAvailable();
+
     public bool UpdateMenu(MenuModel Menu)
     {
         if (Menu == null || Menu.ID <= 0)
