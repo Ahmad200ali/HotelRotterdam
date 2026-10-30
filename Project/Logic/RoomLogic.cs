@@ -73,4 +73,8 @@ public class RoomLogic
 
         return _access.DeleteByID(id);
     }
+    public List<RoomModel> GetAllRooms()
+    {
+        return _access.GetAllRooms();
+    }
 }
