@@ -47,7 +47,7 @@ static class Room
                     break;
 
                 case "5":
-                    Console.WriteLine("\nView all rooms is not implemented yet.");
+                    GetAllroom();
                     break;
 
                 case "0":
@@ -209,6 +209,31 @@ static class Room
         else
         {
             Console.WriteLine("Deletion cancelled.");
+        }
+    }
+
+    private static void GetAllroom()
+    {
+        Console.Clear();
+
+        List<RoomModel> rooms = roomLogic.GetAllRooms();
+
+        if (rooms.Count == 0)
+        {
+            Console.WriteLine("No rooms found.");
+            return;
+        }
+
+        Console.WriteLine("All rooms:\n");
+
+        foreach (RoomModel room in rooms)
+        {
+            Console.WriteLine($"ID: {room.ID}");
+            Console.WriteLine($"Name: {room.Name}");
+            Console.WriteLine($"Type: {room.Type}");
+            Console.WriteLine($"Description: {room.Description}");
+            Console.WriteLine($"Price: {room.Price}");
+            Console.WriteLine(new string('-', 32));
         }
     }
 
