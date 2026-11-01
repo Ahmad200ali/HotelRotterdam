@@ -34,4 +34,33 @@ public static class Check
 
         return true;
     }
+
+    public static bool CheckValidPassword(string password)
+    {
+        if (string.IsNullOrEmpty(password) || password.Length < 8)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine("Password must be at least 8 characters long.");
+            Console.ResetColor();
+            return false;
+        }
+
+        if (!password.Any(char.IsDigit))
+        {
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine("Password must contain at least one number.");
+            Console.ResetColor();
+            return false;
+        }
+
+        if (password.All(char.IsLetterOrDigit))
+        {
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine("Password must contain at least one special character (like ! or @).");
+            Console.ResetColor();
+            return false;
+        }
+
+        return true;
+    }
 }
