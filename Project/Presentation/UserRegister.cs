@@ -15,8 +15,14 @@ public static class UserRegister
         }
         while (!Check.CheckValidEmail(Email));
 
-        Console.WriteLine("Please enter your password:");
-        string Passwoord = Console.ReadLine();
+        string Passwoord;
+        do
+        {
+            Console.WriteLine("Please enter your password (min. 8 characters, with a number and a special character):");
+            Passwoord = UserLogin.ReadPassword();
+        }
+        while (!Check.CheckValidPassword(Passwoord));
+
         Console.WriteLine("Please enter your Name");
         string FullName = Console.ReadLine()!;
         Console.WriteLine("Please enter your Phone-Number");
