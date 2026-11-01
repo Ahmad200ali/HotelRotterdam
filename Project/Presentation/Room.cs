@@ -2,80 +2,100 @@
 static class Room
 {
     private static readonly RoomLogic roomLogic = new RoomLogic();
+    private static readonly RoomTypeLogic roomTypeLogic = new RoomTypeLogic();
 
     public static void Start()
     {
         bool running = true;
 
+        List<string> options = new List<string>
+        {
+            "1. View all rooms",
+            "2. Add a room",
+            "3. Manage room types",
+            "4. Exit"
+        };
+
         while (running)
         {
-            Console.Clear();
-
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("================================");
-            Console.WriteLine("     ROOM MANAGEMENT DASHBOARD");
-            Console.WriteLine("================================");
-            Console.ResetColor();
-
-            Console.WriteLine();
-            Console.WriteLine("1. Add a room");
-            Console.WriteLine("2. Search for a room");
-            Console.WriteLine("3. Update a room");
-            Console.WriteLine("4. Delete a room");
-            Console.WriteLine("5. View all rooms");
-            Console.WriteLine("0. Exit");
-            Console.Write("\nChoose an option: ");
-
-            string choice = Console.ReadLine() ?? "";
+            int choice = ArrowMenu.Show("     ROOM MANAGEMENT DASHBOARD", options);
 
             switch (choice)
             {
-                case "1":
+                case 0:
+                    ViewAllRooms();
+                    break;
+
+                case 1:
                     AddRoom();
                     break;
 
-                case "2":
-                    SearchRoom();
+                case 2:
+                    ManageRoomTypes();
                     break;
 
-                case "3":
-                    UpdateRoom();
-                    break;
-
-                case "4":
-                    DeleteRoom();
-                    break;
-
-                case "5":
-                    GetAllroom();
-                    break;
-
-                case "0":
+                case 3:
+                case -1:
                     running = false;
                     break;
-
-                default:
-                    Console.WriteLine("Invalid choice. Please choose 0-5.");
-                    break;
-            }
-
-            if (running)
-            {
-                Console.WriteLine("\nPress any key to return to the menu...");
-                Console.ReadKey();
             }
         }
     }
 
+    private static void ViewAllRooms()
+    {
+        List<RoomModel> rooms = roomLogic.GetAllRooms();
+
+        if (rooms.Count == 0)
+        {
+            Console.Clear();
+            Console.WriteLine("No rooms found.");
+            WaitForKey();
+            return;
+        }
+
+        List<string> options = new List<string>();
+        foreach (RoomModel room in rooms)
+        {
+            options.Add($"{room.ID}. {room.Name} | {room.Type} | {room.Price}");
+        }
+        options.Add("Back");
+
+        int choice = ArrowMenu.Show("All rooms (choose a room to update or delete it)", options);
+
+        if (choice == -1 || choice == rooms.Count)
+            return;
+
+        RoomOptions(rooms[choice]);
+    }
+
+    private static void RoomOptions(RoomModel room)
+    {
+        string title = $"ID: {room.ID}\n" +
+                       $"Name: {room.Name}\n" +
+                       $"Type: {room.Type}\n" +
+                       $"Description: {room.Description}\n" +
+                       $"Price: {room.Price}";
+
+        int choice = ArrowMenu.Show(title, new List<string> { "Update room", "Delete room", "Back" });
+
+        if (choice == 0)
+            UpdateRoom(room);
+        else if (choice == 1)
+            DeleteRoom(room);
+    }
+
     private static void AddRoom()
     {
+        string type = ChooseRoomType(null);
+        if (type == null)
+            return;
+
         Console.Clear();
+        Console.WriteLine($"Room type: {type}\n");
 
         Console.WriteLine("Enter room name:");
         string name = Console.ReadLine() ?? "";
-
-        Console.WriteLine("Enter room type:");
-        string type = Console.ReadLine() ?? "";
 
         Console.WriteLine("Enter room description:");
         string description = Console.ReadLine() ?? "";
@@ -85,6 +105,7 @@ static class Room
             || price < 0)
         {
             ShowMessage("Invalid price!", false);
+            WaitForKey();
             return;
         }
 
@@ -94,77 +115,47 @@ static class Room
         ShowMessage(
             result ? "Room added successfully!" : "Failed to add room!",
             result);
+        WaitForKey();
     }
 
-    private static void SearchRoom()
+    private static void UpdateRoom(RoomModel room)
     {
+        string type = ChooseRoomType(room.Type);
+        if (type == null)
+            return;
+
         Console.Clear();
-
-        Console.WriteLine("Enter room ID:");
-        if (!int.TryParse(Console.ReadLine(), out int id) || id <= 0)
-        {
-            ShowMessage("Invalid room ID!", false);
-            return;
-        }
-
-        RoomModel room = roomLogic.SearchRoomByID(id);
-
-        if (room == null)
-        {
-            ShowMessage("Room not found!", false);
-            return;
-        }
-
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("\nRoom found successfully!");
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine("Press Enter without typing anything to keep the current value.\n");
         Console.ResetColor();
 
-        Console.WriteLine($"ID: {room.ID}");
-        Console.WriteLine($"Name: {room.Name}");
-        Console.WriteLine($"Type: {room.Type}");
-        Console.WriteLine($"Description: {room.Description}");
-        Console.WriteLine($"Price: {room.Price}");
-    }
+        Console.WriteLine($"Room type: {type}\n");
 
-    private static void UpdateRoom()
-    {
-        Console.Clear();
+        Console.WriteLine($"Name [{room.Name}]:");
+        string name = Console.ReadLine() ?? "";
+        if (!string.IsNullOrWhiteSpace(name))
+            room.Name = name;
 
-        Console.WriteLine("Enter room ID:");
-        if (!int.TryParse(Console.ReadLine(), out int id) || id <= 0)
+        Console.WriteLine($"Description [{room.Description}]:");
+        string description = Console.ReadLine() ?? "";
+        if (!string.IsNullOrWhiteSpace(description))
+            room.Description = description;
+
+        room.Type = type;
+
+        // price is not kept with Enter, the admin has to type it again
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine($"\nThe price has to be entered again! (current price: {room.Price})");
+        Console.ResetColor();
+
+        decimal price;
+        while (true)
         {
-            ShowMessage("Invalid room ID!", false);
-            return;
-        }
+            Console.WriteLine("Enter room price:");
+            if (decimal.TryParse(Console.ReadLine(), out price) && price >= 0)
+                break;
 
-        RoomModel room = roomLogic.SearchRoomByID(id);
-
-        if (room == null)
-        {
-            ShowMessage("Room not found!", false);
-            return;
-        }
-
-        Console.WriteLine($"Current name: {room.Name}");
-        Console.WriteLine("Enter new room name:");
-        room.Name = Console.ReadLine() ?? "";
-
-        Console.WriteLine($"Current type: {room.Type}");
-        Console.WriteLine("Enter new room type:");
-        room.Type = Console.ReadLine() ?? "";
-
-        Console.WriteLine($"Current description: {room.Description}");
-        Console.WriteLine("Enter new room description:");
-        room.Description = Console.ReadLine() ?? "";
-
-        Console.WriteLine($"Current price: {room.Price}");
-        Console.WriteLine("Enter new room price:");
-
-        if (!decimal.TryParse(Console.ReadLine(), out decimal price)
-            || price < 0)
-        {
-            ShowMessage("Invalid price!", false);
-            return;
+            ShowMessage("Invalid price, try again.", false);
         }
 
         room.Price = price;
@@ -174,33 +165,18 @@ static class Room
         ShowMessage(
             result ? "Room updated successfully!" : "Failed to update room!",
             result);
+        WaitForKey();
     }
 
-    private static void DeleteRoom()
+    private static void DeleteRoom(RoomModel room)
     {
         Console.Clear();
-
-        Console.WriteLine("Enter room ID:");
-        if (!int.TryParse(Console.ReadLine(), out int id) || id <= 0)
-        {
-            ShowMessage("Invalid room ID!", false);
-            return;
-        }
-
-        RoomModel room = roomLogic.SearchRoomByID(id);
-
-        if (room == null)
-        {
-            ShowMessage("Room not found!", false);
-            return;
-        }
-
         Console.WriteLine($"Are you sure you want to delete '{room.Name}'? (y/n)");
         string answer = Console.ReadLine() ?? "";
 
         if (answer.Equals("y", StringComparison.OrdinalIgnoreCase))
         {
-            bool result = roomLogic.DeleteRoomByID(id);
+            bool result = roomLogic.DeleteRoomByID(room.ID);
 
             ShowMessage(
                 result ? "Room deleted successfully!" : "Failed to delete room!",
@@ -210,31 +186,98 @@ static class Room
         {
             Console.WriteLine("Deletion cancelled.");
         }
+        WaitForKey();
     }
 
-    private static void GetAllroom()
+    // currentType is null when adding a new room
+    private static string ChooseRoomType(string currentType)
     {
-        Console.Clear();
+        List<RoomTypeModel> types = roomTypeLogic.GetAllRoomTypes();
 
-        List<RoomModel> rooms = roomLogic.GetAllRooms();
-
-        if (rooms.Count == 0)
+        if (types.Count == 0)
         {
-            Console.WriteLine("No rooms found.");
-            return;
+            Console.Clear();
+            ShowMessage("There are no room types yet, add one first under 'Manage room types'.", false);
+            WaitForKey();
+            return null;
         }
 
-        Console.WriteLine("All rooms:\n");
+        List<string> options = new List<string>();
+        if (currentType != null)
+            options.Add($"Keep current type ({currentType})");
 
-        foreach (RoomModel room in rooms)
+        foreach (RoomTypeModel type in types)
+            options.Add(type.Name);
+
+        int choice = ArrowMenu.Show("Choose a room type:", options);
+
+        if (choice == -1)
+            return null;
+
+        if (currentType != null)
         {
-            Console.WriteLine($"ID: {room.ID}");
-            Console.WriteLine($"Name: {room.Name}");
-            Console.WriteLine($"Type: {room.Type}");
-            Console.WriteLine($"Description: {room.Description}");
-            Console.WriteLine($"Price: {room.Price}");
-            Console.WriteLine(new string('-', 32));
+            if (choice == 0)
+                return currentType;
+            return types[choice - 1].Name;
         }
+
+        return types[choice].Name;
+    }
+
+    private static void ManageRoomTypes()
+    {
+        while (true)
+        {
+            List<RoomTypeModel> types = roomTypeLogic.GetAllRoomTypes();
+
+            List<string> options = new List<string>();
+            foreach (RoomTypeModel type in types)
+                options.Add(type.Name);
+            options.Add("+ Add a room type");
+            options.Add("Back");
+
+            int choice = ArrowMenu.Show("ROOM TYPES (choose a type to delete it)", options);
+
+            if (choice == -1 || choice == types.Count + 1)
+                return;
+
+            Console.Clear();
+
+            if (choice == types.Count)
+            {
+                Console.WriteLine("Name of the new room type:");
+                string name = Console.ReadLine() ?? "";
+
+                bool added = roomTypeLogic.AddRoomType(name);
+                ShowMessage(
+                    added ? "Room type succesfully added!" : "Room type is empty or already exists.",
+                    added);
+            }
+            else
+            {
+                RoomTypeModel type = types[choice];
+                Console.WriteLine($"Delete room type '{type.Name}'? (y/n)");
+
+                if ((Console.ReadLine() ?? "").Equals("y", StringComparison.OrdinalIgnoreCase))
+                {
+                    bool deleted = roomTypeLogic.DeleteRoomType(type.ID);
+                    ShowMessage(
+                        deleted ? "Room type deleted!" : "Failed to delete room type!",
+                        deleted);
+                }
+                else
+                {
+                    Console.WriteLine("Deletion cancelled.");
+                }
+            }
+            WaitForKey();
+        }
+    }
+
+    private static void WaitForKey()
+    {
+        Console.WriteLine("\nPress any key to continue...");
+        Console.ReadKey();
     }
 
     private static void ShowMessage(string message, bool success)

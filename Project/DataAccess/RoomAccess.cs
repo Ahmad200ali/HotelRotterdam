@@ -13,7 +13,7 @@ public class RoomAccess
     }
     public RoomModel GetRoomByID(int id)
     {
-        string sql = $"SELECT * FROM {Table} WHERE id = @ID";
+        string sql = $"SELECT id, name, type, description, CAST(price AS REAL) AS price FROM {Table} WHERE id = @ID";
         return _connection.QueryFirstOrDefault<RoomModel>(sql, new { ID = id });
     }
 
@@ -50,7 +50,8 @@ public class RoomAccess
     }
     public List<RoomModel> GetAllRooms()
     {
-        string sql = $"SELECT * FROM {Table}";
+        // CAST is needed, a price like 80 is saved as a whole number and then Dapper crashes
+        string sql = $"SELECT id, name, type, description, CAST(price AS REAL) AS price FROM {Table}";
 
         return _connection.Query<RoomModel>(sql).ToList();
     }
