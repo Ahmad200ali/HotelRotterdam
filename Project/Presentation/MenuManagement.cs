@@ -1,6 +1,7 @@
 public static class MenuManagement
 {
     private static readonly MenuLogic menuLogic = new();
+    private static readonly DishTypeLogic dishTypeLogic = new();
 
     public static void Start()
     {
@@ -11,20 +12,18 @@ public static class MenuManagement
             Console.WriteLine("================================");
             Console.WriteLine("     MENU MANAGEMENT DASHBOARD");
             Console.WriteLine("================================");
-            Console.WriteLine("1. Add a dish");
-            Console.WriteLine("2. View all dishes");
-            Console.WriteLine("3. Update a dish");
-            Console.WriteLine("4. Delete a dish");
-            Console.WriteLine("0. Return to admin menu");
+            Console.WriteLine("1. View all dishes");
+            Console.WriteLine("2. Add a dish");
+            Console.WriteLine("3. Manage dish types");
+            Console.WriteLine("4. Exit");
             Console.Write("Choose an option: ");
 
             switch (Console.ReadLine())
             {
-                case "1": AddDish(); break;
-                case "2": ListDishes(); break;
-                case "3": UpdateDish(); break;
-                case "4": DeleteDish(); break;
-                case "0":Menu.Start(); break;
+                case "1": ViewDishes(); break;
+                case "2": AddDish(); break;
+                case "3": ManageDishTypes(); break;
+                case "4": running = false; break;
                 default: ShowMessage("Invalid choice.", false); break;
             }
 
@@ -39,10 +38,10 @@ public static class MenuManagement
     private static void AddDish()
     {
         Console.Clear();
+        string type = ChooseDishType(null);
+        if (type == null) return;
         Console.Write("Dish name: ");
         string name = Console.ReadLine()?.Trim() ?? "";
-        Console.Write("Type/category: ");
-        string type = Console.ReadLine()?.Trim() ?? "";
         Console.Write("Description: ");
         string description = Console.ReadLine()?.Trim() ?? "";
         Console.Write("Price: ");
@@ -64,6 +63,39 @@ public static class MenuManagement
             PrintDish(dish);
     }
 
+    private static void ViewDishes()
+    {
+        ListDishes();
+        Console.Write("\nEnter a dish ID to update or delete it (or press Enter to go back): ");
+        string input = Console.ReadLine() ?? "";
+        if (string.IsNullOrWhiteSpace(input)) return;
+
+        if (!int.TryParse(input, out int id) || id <= 0)
+        {
+            ShowMessage("Invalid dish ID.", false);
+            return;
+        }
+        MenuModel dish = menuLogic.SearchMenuByID(id);
+        if (dish == null)
+        {
+            ShowMessage("Dish not found.", false);
+            return;
+        }
+
+        Console.Clear();
+        PrintDish(dish);
+        Console.WriteLine("\n1. Update this dish");
+        Console.WriteLine("2. Delete this dish");
+        Console.WriteLine("3. Back");
+        Console.Write("Choose an option: ");
+
+        switch (Console.ReadLine())
+        {
+            case "1": UpdateDish(dish); break;
+            case "2": DeleteDish(dish); break;
+        }
+    }
+
     public static void ListAvailableDishes()
     {
         Console.Clear();
@@ -81,16 +113,17 @@ public static class MenuManagement
         }
     }
 
-    private static void UpdateDish()
+    private static void UpdateDish(MenuModel dish)
     {
         Console.Clear();
-        MenuModel dish = FindDish();
-        if (dish == null) return;
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine("Press Enter without typing anything to keep the current value.\n");
+        Console.ResetColor();
 
+        string type = ChooseDishType(dish.Type);
+        if (type == null) return;
         Console.WriteLine($"Name [{dish.Name}]: ");
         string name = Console.ReadLine()?.Trim() ?? "";
-        Console.WriteLine($"Type/category [{dish.Type}]: ");
-        string type = Console.ReadLine()?.Trim() ?? "";
         Console.WriteLine($"Description [{dish.Description}]: ");
         string description = Console.ReadLine()?.Trim() ?? "";
         Console.WriteLine($"Available [{(dish.IsAvailable ? "y" : "n")}]? (y/n, Enter to keep current): ");
@@ -102,18 +135,18 @@ public static class MenuManagement
             ShowMessage("Enter y or n to set availability.", false);
             return;
         }
-        Console.WriteLine($"Price [{dish.Price}]: ");
-        string priceInput = Console.ReadLine() ?? "";
-        double price = dish.Price;
-        if (!string.IsNullOrWhiteSpace(priceInput) &&
-            (!double.TryParse(priceInput, out price) || price < 0))
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine($"The price has to be entered again! (current price: {dish.Price})");
+        Console.ResetColor();
+        Console.Write("Price: ");
+        if (!TryReadPrice(out double price))
         {
             ShowMessage("Enter a valid non-negative price.", false);
             return;
         }
 
         dish.Name = string.IsNullOrWhiteSpace(name) ? dish.Name : name;
-        dish.Type = string.IsNullOrWhiteSpace(type) ? dish.Type : type;
+        dish.Type = type;
         dish.Description = string.IsNullOrWhiteSpace(description) ? dish.Description : description;
         dish.Price = price;
         if (!string.IsNullOrWhiteSpace(availabilityInput))
@@ -123,11 +156,8 @@ public static class MenuManagement
         ShowMessage(result ? "Dish updated successfully!" : "Failed to update dish!", result);
     }
 
-    private static void DeleteDish()
+    private static void DeleteDish(MenuModel dish)
     {
-        Console.Clear();
-        MenuModel dish = FindDish();
-        if (dish == null) return;
         Console.Write($"Delete '{dish.Name}'? (y/n): ");
         if ((Console.ReadLine() ?? "").Equals("y", StringComparison.OrdinalIgnoreCase))
             ShowMessage(menuLogic.DeleteMenuByID(dish.ID)
@@ -136,18 +166,68 @@ public static class MenuManagement
             Console.WriteLine("Deletion cancelled.");
     }
 
-    private static MenuModel FindDish()
+    // currentType is null when adding a new dish
+    private static string ChooseDishType(string currentType)
     {
-        Console.Write("Dish ID: ");
-        if (!int.TryParse(Console.ReadLine(), out int id) || id <= 0)
+        List<DishTypeModel> types = dishTypeLogic.GetAllDishTypes();
+        if (types.Count == 0)
         {
-            ShowMessage("Invalid dish ID.", false);
+            ShowMessage("There are no dish types yet, add one first under 'Manage dish types'.", false);
             return null;
         }
-        MenuModel dish = menuLogic.SearchMenuByID(id);
-        if (dish == null) ShowMessage("Dish not found.", false);
-        else PrintDish(dish);
-        return dish;
+
+        Console.WriteLine("Dish types:");
+        for (int i = 0; i < types.Count; i++)
+            Console.WriteLine($"{i + 1}. {types[i].Name}");
+
+        if (currentType != null)
+            Console.Write($"Choose a type [{currentType}]: ");
+        else
+            Console.Write("Choose a type: ");
+
+        string input = Console.ReadLine() ?? "";
+        if (currentType != null && string.IsNullOrWhiteSpace(input))
+            return currentType;
+
+        if (!int.TryParse(input, out int choice) || choice < 1 || choice > types.Count)
+        {
+            ShowMessage("Invalid dish type.", false);
+            return null;
+        }
+        return types[choice - 1].Name;
+    }
+
+    private static void ManageDishTypes()
+    {
+        Console.Clear();
+        Console.WriteLine("DISH TYPES\n");
+        List<DishTypeModel> types = dishTypeLogic.GetAllDishTypes();
+        foreach (DishTypeModel type in types)
+            Console.WriteLine($"ID: {type.ID} | {type.Name}");
+
+        Console.WriteLine("\n1. Add a dish type");
+        Console.WriteLine("2. Delete a dish type");
+        Console.WriteLine("3. Back");
+        Console.Write("Choose an option: ");
+
+        switch (Console.ReadLine())
+        {
+            case "1":
+                Console.Write("Name of the new dish type: ");
+                bool added = dishTypeLogic.AddDishType(Console.ReadLine() ?? "");
+                ShowMessage(added ? "Dish type added!" : "Dish type is empty or already exists.", added);
+                break;
+            case "2":
+                Console.Write("Dish type ID: ");
+                if (!int.TryParse(Console.ReadLine(), out int id))
+                {
+                    ShowMessage("Invalid ID.", false);
+                    break;
+                }
+                bool deleted = dishTypeLogic.DeleteDishType(id);
+                ShowMessage(deleted ? "Dish type deleted!" : "Dish type not found.", deleted);
+                break;
+        }
     }
 
     private static bool TryReadPrice(out double price)
