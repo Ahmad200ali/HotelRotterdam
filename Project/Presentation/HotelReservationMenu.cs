@@ -1,3 +1,4 @@
+using System.Globalization;
 
 public class HotelReservationMenu
 {
@@ -13,19 +14,19 @@ public class HotelReservationMenu
             Console.Clear();
 
             Console.WriteLine("=== Hotel Reservations ===");
-            Console.WriteLine("1. View available rooms");
-            Console.WriteLine("2. Create reservation");
+            Console.WriteLine("1. Create reservation");
+            Console.WriteLine("2. My reservations");
             Console.WriteLine("0. Return to guest menu");
             Console.Write("Choose an option: ");
 
             switch (Console.ReadLine())
             {
                 case "1":
-                    ViewAvailableRooms();
+                    CreateReservation(guest);
                     break;
 
                 case "2":
-                    CreateReservation(guest);
+                    MyReservations(guest);
                     break;
 
                 case "0":
@@ -38,30 +39,6 @@ public class HotelReservationMenu
                     break;
             }
         }
-    }
-
-    private static void ViewAvailableRooms()
-    {
-        Console.Clear();
-
-        Console.WriteLine("=== Available Rooms ===");
-
-        if (!GetDates(out DateTime startDate, out DateTime endDate))
-            return;
-
-        List<RoomModel> availableRooms = GetAvailableRooms(startDate, endDate);
-
-        if (availableRooms.Count == 0)
-        {
-            Console.WriteLine("No rooms available for these dates.");
-        }
-        else
-        {
-            DisplayRooms(availableRooms);
-        }
-
-        Console.WriteLine("\nPress any key to continue.");
-        Console.ReadKey();
     }
 
     private static void CreateReservation(UserModel guest)
@@ -103,8 +80,8 @@ public class HotelReservationMenu
         Console.WriteLine("\n=== Reservation Details ===");
         Console.WriteLine($"Room: {selectedRoom.Name}");
         Console.WriteLine($"Type: {selectedRoom.Type}");
-        Console.WriteLine($"Check-in: {startDate:yyyy-MM-dd}");
-        Console.WriteLine($"Check-out: {endDate:yyyy-MM-dd}");
+        Console.WriteLine($"Check-in: {startDate:dd-MM-yyyy}");
+        Console.WriteLine($"Check-out: {endDate:dd-MM-yyyy}");
         Console.WriteLine($"Nights: {nights}");
         Console.WriteLine($"Price per night: {selectedRoom.Price:C}");
         Console.WriteLine($"Total price: {price:C}");
@@ -124,6 +101,74 @@ public class HotelReservationMenu
         Console.WriteLine(success
             ? "\nReservation successfully created!"
             : "\nCould not create reservation.");
+
+        Console.WriteLine("\nPress any key to continue.");
+        Console.ReadKey();
+    }
+
+    private static void MyReservations(UserModel guest)
+    {
+        Console.Clear();
+
+        Console.WriteLine("=== My Reservations ===\n");
+
+        List<HotelReservationModel> reservations =
+            _reservationLogic.GetReservationsByUserID(guest.Id);
+
+        if (reservations.Count == 0)
+        {
+            Console.WriteLine("You don't have any reservations yet.");
+            Console.WriteLine("\nPress any key to continue.");
+            Console.ReadKey();
+            return;
+        }
+
+        for (int i = 0; i < reservations.Count; i++)
+        {
+            HotelReservationModel reservation = reservations[i];
+            RoomModel room = _roomLogic.SearchRoomByID((int)reservation.Room_Id);
+            string roomName = room != null ? room.Name : "Room no longer exists";
+            string status = reservation.EndDate.Date < DateTime.Today ? "(past)" : "";
+
+            Console.WriteLine($"[{i + 1}] {roomName} {status}");
+            Console.WriteLine($"    {reservation.StartDate:dd-MM-yyyy} until {reservation.EndDate:dd-MM-yyyy}");
+            Console.WriteLine($"    Total price: {reservation.Price:C}");
+            Console.WriteLine();
+        }
+
+        Console.Write("Enter a number to cancel that reservation (or press Enter to go back): ");
+        string input = Console.ReadLine() ?? "";
+
+        if (string.IsNullOrWhiteSpace(input))
+            return;
+
+        if (!int.TryParse(input, out int choice) ||
+            choice < 1 || choice > reservations.Count)
+        {
+            Console.WriteLine("Invalid choice.");
+            Console.ReadKey();
+            return;
+        }
+
+        HotelReservationModel selected = reservations[choice - 1];
+
+        if (selected.StartDate.Date <= DateTime.Today)
+        {
+            Console.WriteLine("You can only cancel reservations that have not started yet.");
+            Console.ReadKey();
+            return;
+        }
+
+        Console.Write("Are you sure you want to cancel this reservation? (y/n): ");
+
+        if (Console.ReadLine()?.ToLower() != "y")
+            return;
+
+        bool success = _reservationLogic.DeleteHotelReservationByID(selected.Id);
+
+        Console.WriteLine(success
+            ? "\nReservation cancelled."
+            : "\nCould not cancel the reservation.");
 
         Console.WriteLine("\nPress any key to continue.");
         Console.ReadKey();
@@ -159,18 +204,20 @@ public class HotelReservationMenu
         startDate = default;
         endDate = default;
 
-        Console.Write("Check-in date (yyyy-MM-dd): ");
+        Console.Write("Check-in date (dd-mm-yyyy): ");
 
-        if (!DateTime.TryParse(Console.ReadLine(), out startDate))
+        if (!DateTime.TryParseExact(Console.ReadLine(), "dd-MM-yyyy",
+            CultureInfo.InvariantCulture, DateTimeStyles.None, out startDate))
         {
             Console.WriteLine("Invalid check-in date.");
             Console.ReadKey();
             return false;
         }
 
-        Console.Write("Check-out date (yyyy-MM-dd): ");
+        Console.Write("Check-out date (dd-mm-yyyy): ");
 
-        if (!DateTime.TryParse(Console.ReadLine(), out endDate) ||
+        if (!DateTime.TryParseExact(Console.ReadLine(), "dd-MM-yyyy",
+            CultureInfo.InvariantCulture, DateTimeStyles.None, out endDate) ||
             endDate.Date <= startDate.Date)
         {
             Console.WriteLine("Invalid check-out date.");

@@ -102,7 +102,12 @@ public class HotelReservationAccess
 
     public List<HotelReservationModel> GetReservationsByUserID(Int64 userId)
     {
-        string sql = $"SELECT * FROM {Table} WHERE User_Id = @User_Id";
+        // Start_Date and End_Date dont match the model names so they need an alias
+        string sql = $@"
+        SELECT Id, User_Id, Room_Id, Start_Date AS StartDate, End_Date AS EndDate, Price
+        FROM {Table}
+        WHERE User_Id = @User_Id
+        ORDER BY Start_Date";
 
         return _connection.Query<HotelReservationModel>(
             sql, new { User_Id = userId }).ToList();
