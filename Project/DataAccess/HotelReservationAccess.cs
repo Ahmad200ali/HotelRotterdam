@@ -19,7 +19,11 @@ public class HotelReservationAccess
 
     public HotelReservationModel GetHotelReservationByID(Int64 id)
     {
-        string sql = $"SELECT * FROM {Table} WHERE Id = @ID";
+        // Start_Date and End_Date dont match the model names so they need an alias
+        string sql = $@"
+        SELECT Id, User_Id, Room_Id, Start_Date AS StartDate, End_Date AS EndDate, Price
+        FROM {Table}
+        WHERE Id = @ID";
 
         return _connection.QueryFirstOrDefault<HotelReservationModel>(
             sql, new { ID = id });
@@ -111,5 +115,23 @@ public class HotelReservationAccess
 
         return _connection.Query<HotelReservationModel>(
             sql, new { User_Id = userId }).ToList();
+    }
+
+    // true when the room has a reservation that has not ended yet
+    public bool RoomHasReservations(Int64 roomId)
+    {
+        string sql = $@"
+        SELECT EXISTS (
+            SELECT 1
+            FROM {Table}
+            WHERE Room_Id = @Room_Id
+            AND End_Date >= @Today
+        )";
+
+        return _connection.ExecuteScalar<bool>(sql, new
+        {
+            Room_Id = roomId,
+            Today = DateTime.Today.ToString("yyyy-MM-dd HH:mm:ss")
+        });
     }
 }

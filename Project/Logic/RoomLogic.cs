@@ -2,6 +2,7 @@
 public class RoomLogic
 {
     private readonly RoomAccess _access = new();
+    private readonly HotelReservationAccess _reservationAccess = new();
 
     public bool WriteRoom(RoomModel room)
     {
@@ -71,8 +72,21 @@ public class RoomLogic
         if (id <= 0)
             return false;
 
+        // a room that still has reservations can not be deleted
+        if (HasReservations(id))
+            return false;
+
         return _access.DeleteByID(id);
     }
+
+    public bool HasReservations(int id)
+    {
+        if (id <= 0)
+            return false;
+
+        return _reservationAccess.RoomHasReservations(id);
+    }
+
     public List<RoomModel> GetAllRooms()
     {
         return _access.GetAllRooms();

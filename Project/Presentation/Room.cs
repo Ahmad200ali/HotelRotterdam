@@ -171,6 +171,14 @@ static class Room
     private static void DeleteRoom(RoomModel room)
     {
         Console.Clear();
+
+        if (roomLogic.HasReservations(room.ID))
+        {
+            ShowMessage("This room still has reservations, so it can not be deleted.", false);
+            WaitForKey();
+            return;
+        }
+
         Console.WriteLine($"Are you sure you want to delete '{room.Name}'? (y/n)");
         string answer = Console.ReadLine() ?? "";
 
