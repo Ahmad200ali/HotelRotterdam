@@ -10,7 +10,7 @@ public static class GuestMenu
             Console.WriteLine($"Welcome, {guest.FullName}");
             Console.WriteLine("1. View the hotel floor plan");
             Console.WriteLine("2. View available dishes");
-            Console.WriteLine("3. Create reservation");
+            Console.WriteLine("3. Reservations");
             Console.WriteLine("0. Log out");
             Console.Write("Choose an option: ");
 

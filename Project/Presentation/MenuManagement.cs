@@ -51,8 +51,8 @@ public static class MenuManagement
             return;
         }
 
-        ShowMessage(menuLogic.WriteMenu(name, type, description, price)
-            ? "Dish added successfully!" : "Failed to add dish!", true);
+        bool result = menuLogic.WriteMenu(name, type, description, price);
+        ShowMessage(result ? "Dish added successfully!" : "Failed to add dish!", result);
     }
 
     public static void ListDishes()
@@ -160,10 +160,14 @@ public static class MenuManagement
     {
         Console.Write($"Delete '{dish.Name}'? (y/n): ");
         if ((Console.ReadLine() ?? "").Equals("y", StringComparison.OrdinalIgnoreCase))
-            ShowMessage(menuLogic.DeleteMenuByID(dish.ID)
-                ? "Dish deleted successfully!" : "Failed to delete dish!", true);
+        {
+            bool result = menuLogic.DeleteMenuByID(dish.ID);
+            ShowMessage(result ? "Dish deleted successfully!" : "Failed to delete dish!", result);
+        }
         else
+        {
             Console.WriteLine("Deletion cancelled.");
+        }
     }
 
     // currentType is null when adding a new dish
