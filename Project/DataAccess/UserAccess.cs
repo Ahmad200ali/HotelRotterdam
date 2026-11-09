@@ -17,7 +17,8 @@ public class UserAccess
 
     public UserModel GetByEmail(string email)
     {
-        string sql = $"SELECT * FROM {Table} WHERE email = @Email";
+        // email doesnt match the model name so it needs an alias
+        string sql = $"SELECT *, email AS EmailAddress FROM {Table} WHERE email = @Email";
         return _connection.QueryFirstOrDefault<UserModel>(sql, new { Email = email });
     }
 
