@@ -64,4 +64,11 @@ public class MenuAccess
         return rowsAffected > 0;
     }
 
+    // true when there is still a dish with this type
+    public bool TypeIsUsed(string type)
+    {
+        string sql = $"SELECT EXISTS (SELECT 1 FROM {Table} WHERE type = @Type)";
+        return _connection.ExecuteScalar<bool>(sql, new { Type = type });
+    }
+
 }

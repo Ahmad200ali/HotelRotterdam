@@ -228,6 +228,11 @@ public static class MenuManagement
                     ShowMessage("Invalid ID.", false);
                     break;
                 }
+                if (dishTypeLogic.IsInUse(id))
+                {
+                    ShowMessage("This dish type is still used by a dish, so it can not be deleted.", false);
+                    break;
+                }
                 bool deleted = dishTypeLogic.DeleteDishType(id);
                 ShowMessage(deleted ? "Dish type deleted!" : "Dish type not found.", deleted);
                 break;

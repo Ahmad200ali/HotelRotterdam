@@ -19,6 +19,12 @@ public class RoomTypeAccess
         return _connection.Query<RoomTypeModel>(sql).ToList();
     }
 
+    public RoomTypeModel GetByID(int id)
+    {
+        string sql = $"SELECT * FROM {Table} WHERE id = @Id";
+        return _connection.QueryFirstOrDefault<RoomTypeModel>(sql, new { Id = id });
+    }
+
     public RoomTypeModel GetByName(string name)
     {
         string sql = $"SELECT * FROM {Table} WHERE name = @Name";

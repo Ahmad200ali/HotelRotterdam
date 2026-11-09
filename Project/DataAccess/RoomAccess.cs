@@ -55,4 +55,11 @@ public class RoomAccess
 
         return _connection.Query<RoomModel>(sql).ToList();
     }
+
+    // true when there is still a room with this type
+    public bool TypeIsUsed(string type)
+    {
+        string sql = $"SELECT EXISTS (SELECT 1 FROM {Table} WHERE type = @Type)";
+        return _connection.ExecuteScalar<bool>(sql, new { Type = type });
+    }
 }

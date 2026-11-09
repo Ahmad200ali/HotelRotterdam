@@ -19,6 +19,12 @@ public class DishTypeAccess
         return _connection.Query<DishTypeModel>(sql).ToList();
     }
 
+    public DishTypeModel GetByID(int id)
+    {
+        string sql = $"SELECT * FROM {Table} WHERE id = @Id";
+        return _connection.QueryFirstOrDefault<DishTypeModel>(sql, new { Id = id });
+    }
+
     public DishTypeModel GetByName(string name)
     {
         string sql = $"SELECT * FROM {Table} WHERE name = @Name";

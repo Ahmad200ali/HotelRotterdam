@@ -278,6 +278,14 @@ static class Room
             else
             {
                 RoomTypeModel type = types[choice];
+
+                if (roomTypeLogic.IsInUse(type.ID))
+                {
+                    ShowMessage("This room type is still used by a room, so it can not be deleted.", false);
+                    WaitForKey();
+                    continue;
+                }
+
                 Console.WriteLine($"Delete room type '{type.Name}'? (y/n)");
 
                 if ((Console.ReadLine() ?? "").Equals("y", StringComparison.OrdinalIgnoreCase))
