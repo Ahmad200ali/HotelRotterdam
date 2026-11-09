@@ -23,7 +23,6 @@ public static class AdminMenu
                     break;
                 case "0":
                     loggedIn = false;
-                    Menu.Start();
                     break;
                 default:
                     Console.WriteLine("Invalid option. Press any key to try again.");

@@ -36,10 +36,16 @@ public static class UserRegister
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Registration successful!");
             Console.ResetColor();
-            Console.ReadKey();
-            Menu.Start();
-            
         }
+        else
+        {
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine("An account with this email already exists.");
+            Console.ResetColor();
+        }
+
+        Console.WriteLine("Press any key to go back.");
+        Console.ReadKey();
     }
 
 
