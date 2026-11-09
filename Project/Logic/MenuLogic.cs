@@ -8,6 +8,10 @@ public class MenuLogic
         if (Menu == null)
             return false;
 
+        // a dish always needs a name
+        if (string.IsNullOrWhiteSpace(Menu.Name))
+            return false;
+
         _access.Write(Menu);
         return true;
     }
@@ -41,6 +45,9 @@ public class MenuLogic
     public bool UpdateMenu(MenuModel Menu)
     {
         if (Menu == null || Menu.ID <= 0)
+            return false;
+
+        if (string.IsNullOrWhiteSpace(Menu.Name))
             return false;
 
         _access.UpdateMenu(Menu);

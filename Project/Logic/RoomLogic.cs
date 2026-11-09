@@ -9,6 +9,10 @@ public class RoomLogic
         if (room == null)
             return false;
 
+        // a room always needs a name
+        if (string.IsNullOrWhiteSpace(room.Name))
+            return false;
+
         _access.Write(room);
         return true;
     }
@@ -38,6 +42,9 @@ public class RoomLogic
     public bool UpdateRoom(RoomModel room)
     {
         if (room == null || room.ID <= 0)
+            return false;
+
+        if (string.IsNullOrWhiteSpace(room.Name))
             return false;
 
         _access.UpdateRoom(room);

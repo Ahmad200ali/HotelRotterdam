@@ -96,6 +96,12 @@ static class Room
 
         Console.WriteLine("Enter room name:");
         string name = Console.ReadLine() ?? "";
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            ShowMessage("Room name can not be empty!", false);
+            WaitForKey();
+            return;
+        }
 
         Console.WriteLine("Enter room description:");
         string description = Console.ReadLine() ?? "";
@@ -135,6 +141,14 @@ static class Room
         string name = Console.ReadLine() ?? "";
         if (!string.IsNullOrWhiteSpace(name))
             room.Name = name;
+
+        // old rooms can still have no name, then Enter is not allowed
+        if (string.IsNullOrWhiteSpace(room.Name))
+        {
+            ShowMessage("Room name can not be empty!", false);
+            WaitForKey();
+            return;
+        }
 
         Console.WriteLine($"Description [{room.Description}]:");
         string description = Console.ReadLine() ?? "";
