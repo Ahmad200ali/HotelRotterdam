@@ -23,12 +23,30 @@ public static class UserRegister
         }
         while (!Check.CheckValidPassword(Passwoord));
 
-        Console.WriteLine("Please enter your Name");
-        string FullName = Console.ReadLine()!;
-        Console.WriteLine("Please enter your Phone-Number");
-        string PhoneNumber = Console.ReadLine()!;
-        Console.WriteLine("Please enter your DateOfBirth (yyyy-mmmm-dddd)");
-        string DateOfBirth = Console.ReadLine()!;
+        string FullName;
+        do
+        {
+            Console.WriteLine("Please enter your Name");
+            FullName = Console.ReadLine()!;
+        }
+        while (!Check.CheckValidName(FullName));
+
+        string PhoneNumber;
+        do
+        {
+            Console.WriteLine("Please enter your Phone-Number");
+            PhoneNumber = Console.ReadLine()!;
+        }
+        while (!Check.CheckValidPhoneNumber(PhoneNumber));
+
+        string DateOfBirth;
+        do
+        {
+            Console.WriteLine("Please enter your DateOfBirth (dd-mm-yyyy)");
+            DateOfBirth = Console.ReadLine()!;
+        }
+        while (!Check.CheckValidDateOfBirth(DateOfBirth));
+
         bool registered = accountsLogic.Register(Email,Passwoord!,FullName,PhoneNumber,DateOfBirth);
         if (registered)
         {
