@@ -75,7 +75,8 @@ public class HotelReservationMenu
 
         int nights = (endDate.Date - startDate.Date).Days;
 
-        double price = Convert.ToDouble(selectedRoom.Price) * nights;
+        // multiply as decimal first, otherwise the total can become something like 2760.8900000000003
+        double price = Convert.ToDouble(selectedRoom.Price * nights);
 
         Console.WriteLine("\n=== Reservation Details ===");
         Console.WriteLine($"Room: {selectedRoom.Name}");

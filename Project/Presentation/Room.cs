@@ -101,7 +101,7 @@ static class Room
         string description = Console.ReadLine() ?? "";
 
         Console.WriteLine("Enter room price:");
-        if (!decimal.TryParse(Console.ReadLine(), out decimal price)
+        if (!Check.TryParsePrice(Console.ReadLine() ?? "", out decimal price)
             || price < 0)
         {
             ShowMessage("Invalid price!", false);
@@ -152,7 +152,7 @@ static class Room
         while (true)
         {
             Console.WriteLine("Enter room price:");
-            if (decimal.TryParse(Console.ReadLine(), out price) && price >= 0)
+            if (Check.TryParsePrice(Console.ReadLine() ?? "", out price) && price >= 0)
                 break;
 
             ShowMessage("Invalid price, try again.", false);

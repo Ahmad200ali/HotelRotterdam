@@ -112,4 +112,13 @@ public static class Check
 
         return true;
     }
+
+    // reads a price the same way on every computer, both 12.50 and 12,50 are accepted
+    public static bool TryParsePrice(string input, out decimal price)
+    {
+        input = input.Trim().Replace(',', '.');
+
+        return decimal.TryParse(input, NumberStyles.AllowDecimalPoint,
+            CultureInfo.InvariantCulture, out price);
+    }
 }

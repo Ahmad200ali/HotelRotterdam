@@ -136,7 +136,7 @@ public static class MenuManagement
             return;
         }
         Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine($"The price has to be entered again! (current price: {dish.Price})");
+        Console.WriteLine($"The price has to be entered again! (current price: {dish.Price:C})");
         Console.ResetColor();
         Console.Write("Price: ");
         if (!TryReadPrice(out double price))
@@ -236,7 +236,10 @@ public static class MenuManagement
 
     private static bool TryReadPrice(out double price)
     {
-        return double.TryParse(Console.ReadLine(), out price) && price >= 0;
+        bool valid = Check.TryParsePrice(Console.ReadLine() ?? "", out decimal parsedPrice);
+        price = (double)parsedPrice;
+
+        return valid && price >= 0;
     }
 
     private static void PrintDish(MenuModel dish)
