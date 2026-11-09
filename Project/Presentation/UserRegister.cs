@@ -15,13 +15,13 @@ public static class UserRegister
         }
         while (!Check.CheckValidEmail(Email));
 
-        string Passwoord;
+        string Password;
         do
         {
             Console.WriteLine("Please enter your password (min. 8 characters, with a number and a special character):");
-            Passwoord = UserLogin.ReadPassword();
+            Password = UserLogin.ReadPassword();
         }
-        while (!Check.CheckValidPassword(Passwoord));
+        while (!Check.CheckValidPassword(Password));
 
         string FullName;
         do
@@ -47,7 +47,7 @@ public static class UserRegister
         }
         while (!Check.CheckValidDateOfBirth(DateOfBirth));
 
-        bool registered = accountsLogic.Register(Email,Passwoord!,FullName,PhoneNumber,DateOfBirth);
+        bool registered = accountsLogic.Register(Email,Password!,FullName,PhoneNumber,DateOfBirth);
         if (registered)
         {
             Console.Clear();

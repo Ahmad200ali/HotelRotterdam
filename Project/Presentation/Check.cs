@@ -7,7 +7,7 @@ public static class Check
         if (string.IsNullOrWhiteSpace(email))
         {
             Console.ForegroundColor = ConsoleColor.DarkRed;
-            Console.WriteLine("Email cannot be null!");
+            Console.WriteLine("Email cannot be empty!");
             Console.ResetColor();
             return false;
         }

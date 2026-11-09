@@ -57,7 +57,7 @@ static class Room
         List<string> options = new List<string>();
         foreach (RoomModel room in rooms)
         {
-            options.Add($"{room.ID}. {room.Name} | {room.Type} | {room.Price}");
+            options.Add($"{room.ID}. {room.Name} | {room.Type} | {room.Price:C}");
         }
         options.Add("Back");
 
@@ -75,7 +75,7 @@ static class Room
                        $"Name: {room.Name}\n" +
                        $"Type: {room.Type}\n" +
                        $"Description: {room.Description}\n" +
-                       $"Price: {room.Price}";
+                       $"Price: {room.Price:C}";
 
         int choice = ArrowMenu.Show(title, new List<string> { "Update room", "Delete room", "Back" });
 
@@ -145,7 +145,7 @@ static class Room
 
         // price is not kept with Enter, the admin has to type it again
         Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine($"\nThe price has to be entered again! (current price: {room.Price})");
+        Console.WriteLine($"\nThe price has to be entered again! (current price: {room.Price:C})");
         Console.ResetColor();
 
         decimal price;
@@ -258,7 +258,7 @@ static class Room
 
                 bool added = roomTypeLogic.AddRoomType(name);
                 ShowMessage(
-                    added ? "Room type succesfully added!" : "Room type is empty or already exists.",
+                    added ? "Room type successfully added!" : "Room type is empty or already exists.",
                     added);
             }
             else
