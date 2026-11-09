@@ -3,7 +3,7 @@
 
 
 [TestClass]
-public sealed class Test1
+public sealed class LoginTests
 {
 
 
