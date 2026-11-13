@@ -1,4 +1,4 @@
-public class MenuModel
+public class DishModel
 {
     public int ID { get; set; }
     public string Name { get; set; }
@@ -7,9 +7,9 @@ public class MenuModel
     public double Price { get; set; }
     public bool IsAvailable { get; set; } = true;
 
-    public MenuModel() { }
+    public DishModel() { }
 
-    public MenuModel(int id, string name, string type, string description, double price)
+    public DishModel(int id, string name, string type, string description, double price)
     {
         ID = id;
         Name = name;

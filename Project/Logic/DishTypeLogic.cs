@@ -1,8 +1,9 @@
+using System.Collections.Generic;
 
 public class DishTypeLogic
 {
     private readonly DishTypeAccess _access = new();
-    private readonly MenuAccess _menuAccess = new();
+    private readonly DishAccess _dishAccess = new();
 
     public List<DishTypeModel> GetAllDishTypes()
     {
@@ -18,6 +19,7 @@ public class DishTypeLogic
             return false;
 
         _access.Write(new DishTypeModel { Name = name.Trim() });
+
         return true;
     }
 
@@ -26,7 +28,7 @@ public class DishTypeLogic
         if (id <= 0)
             return false;
 
-        // a type that is still used by a dish can not be deleted
+        // A type that is still used by a dish cannot be deleted.
         if (IsInUse(id))
             return false;
 
@@ -36,9 +38,10 @@ public class DishTypeLogic
     public bool IsInUse(int id)
     {
         DishTypeModel type = _access.GetByID(id);
+
         if (type == null)
             return false;
 
-        return _menuAccess.TypeIsUsed(type.Name);
+        return _dishAccess.TypeIsUsed(type.Name);
     }
 }

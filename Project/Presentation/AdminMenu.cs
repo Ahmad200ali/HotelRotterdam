@@ -9,7 +9,7 @@ public static class AdminMenu
             Console.Clear();
             Console.WriteLine($"Welcome, {employee.FullName} (Admin)");
             Console.WriteLine("1. Manage rooms");
-            Console.WriteLine("2. Manage menu dishes");
+            Console.WriteLine("2. Manage dishes");
             Console.WriteLine("3. Manage Activities");
             Console.WriteLine("0. Log out");
             Console.Write("Choose an option: ");
@@ -20,7 +20,7 @@ public static class AdminMenu
                     Room.Start();
                     break;
                 case "2":
-                    MenuManagement.Start();
+                    DishManagement.Start();
                     break;
                 case "3":
                     ActivityManagement.Start();
