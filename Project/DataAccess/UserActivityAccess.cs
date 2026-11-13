@@ -24,7 +24,7 @@ public class UserActivityAccess
         return _connection.Query<UserActivityModel>(sql).ToList();
     }
 
-    public List<UserActivityModel> GetByUserID(int userId)
+    public List<UserActivityModel> GetByUserID(long userId)
     {
         string sql = $"SELECT * FROM {Table} WHERE User_Id = @UserId";
 

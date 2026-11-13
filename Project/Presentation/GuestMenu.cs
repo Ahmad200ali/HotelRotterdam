@@ -30,6 +30,10 @@ public static class GuestMenu
                     Console.Clear();
                     HotelReservationMenu.Start(guest);
                     break;
+                case "4":
+                    Console.Clear();
+                    GuestActivityManagement.Start(guest);
+                    break;
                 case "0":
                     loggedIn = false;
                     break;
