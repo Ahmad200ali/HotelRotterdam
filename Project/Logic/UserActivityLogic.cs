@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 public class UserActivityLogic
 {
     private UserActivityAccess _userActivityAccess =
@@ -13,7 +15,7 @@ public class UserActivityLogic
         return _userActivityAccess.GetAll();
     }
 
-    public List<UserActivityModel> GetByUserID(int userId)
+    public List<UserActivityModel> GetByUserID(long userId)
     {
         return _userActivityAccess.GetByUserID(userId);
     }
