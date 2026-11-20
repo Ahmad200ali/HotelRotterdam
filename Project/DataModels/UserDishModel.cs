@@ -3,13 +3,15 @@ public class UserDishModel
     public int Id { get; set; }
     public long User_Id { get; set; }
     public int Dish_Id { get; set; }
+    public int Count { get; set; } = 1;
 
     public UserDishModel() { }
 
-    public UserDishModel(int id, long userId, int dishId)
+    public UserDishModel(int id, long userId, int dishId, int count = 1)
     {
         Id = id;
         User_Id = userId;
         Dish_Id = dishId;
+        Count = count;
     }
 }

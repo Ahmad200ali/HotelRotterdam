@@ -142,13 +142,8 @@ public class GuestDishManagement
     private static void OrderDish(DishModel dish, UserModel guest)
     {
         var orders = _userDishLogic.GetByUserID(guest.Id);
-
-        if (orders.Exists(o => o.Dish_Id == dish.ID))
-        {
-            Console.WriteLine("\nYou have already ordered this dish!");
-            Pause();
-            return;
-        }
+        UserDishModel existingOrder = orders.Find(o => o.Dish_Id == dish.ID);
+        int count = existingOrder?.Count ?? 1;
 
         DishModel currentDish = _dishLogic.GetByID(dish.ID);
 
@@ -159,16 +154,53 @@ public class GuestDishManagement
             return;
         }
 
-        UserDishModel userDish = new UserDishModel(
-            0,
-            guest.Id,
-            dish.ID
-        );
+        while (true)
+        {
+            Console.Clear();
+            Console.WriteLine($"===== Order {dish.Name} =====");
+            Console.WriteLine($"Count: {count}");
+            Console.WriteLine("1. Change count");
+            Console.WriteLine("2. Place order");
+            Console.WriteLine("0. Cancel");
+            Console.Write("\nChoose an option: ");
 
-        _userDishLogic.Add(userDish);
+            switch (Console.ReadLine())
+            {
+                case "1":
+                    Console.Write("Enter count (at least 1): ");
+                    if (int.TryParse(Console.ReadLine(), out int newCount) && newCount > 0)
+                        count = newCount;
+                    else
+                    {
+                        Console.WriteLine("Please enter a valid count greater than zero.");
+                        Pause();
+                    }
+                    break;
 
-        Console.WriteLine("\nDish ordered successfully!");
-        Pause();
+                case "2":
+                    if (existingOrder == null)
+                    {
+                        _userDishLogic.Add(new UserDishModel(0, guest.Id, dish.ID, count));
+                    }
+                    else
+                    {
+                        existingOrder.Count = count;
+                        _userDishLogic.Update(existingOrder);
+                    }
+
+                    Console.WriteLine("\nDish order placed successfully!");
+                    Pause();
+                    return;
+
+                case "0":
+                    return;
+
+                default:
+                    Console.WriteLine("Invalid option!");
+                    Pause();
+                    break;
+            }
+        }
     }
 
     private static void ViewMyDishes(UserModel guest)
@@ -196,6 +228,7 @@ public class GuestDishManagement
                 Console.WriteLine($"Name: {dish.Name}");
                 Console.WriteLine($"Type: {dish.Type}");
                 Console.WriteLine($"Description: {dish.Description}");
+                Console.WriteLine($"Count: {order.Count}");
                 Console.WriteLine($"Price: € {dish.Price:0.00}");
             }
         }
