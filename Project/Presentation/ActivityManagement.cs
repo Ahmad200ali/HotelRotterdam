@@ -35,7 +35,8 @@ public class ActivityManagement
 
                 default:
                     Console.WriteLine("Invalid option!");
-                    Pause();
+                    Console.WriteLine("\nPress any key to continue...");
+                    Console.ReadKey();
                     break;
             }
 
@@ -48,17 +49,26 @@ public class ActivityManagement
         Console.WriteLine("===== Add Activity =====");
 
         Console.Write("Activity name: ");
-        string name = Console.ReadLine();
+        string name = Console.ReadLine()?.Trim();
 
         Console.Write("Description: ");
-        string description = Console.ReadLine();
+        string description = Console.ReadLine()?.Trim();
+
+        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(description))
+        {
+            Console.WriteLine("Name and description are required!");
+            Console.WriteLine("\nPress any key to continue...");
+            Console.ReadKey();
+            return;
+        }
 
         Console.Write("Price: ");
 
         if (!decimal.TryParse(Console.ReadLine(), out decimal price) || price < 0)
         {
             Console.WriteLine("Invalid price!");
-            Pause();
+            Console.WriteLine("\nPress any key to continue...");
+            Console.ReadKey();
             return;
         }
 
@@ -69,7 +79,8 @@ public class ActivityManagement
         _activityLogic.Add(activity);
 
         Console.WriteLine("\nActivity added successfully!");
-        Pause();
+        Console.WriteLine("\nPress any key to continue...");
+        Console.ReadKey();
     }
 
     private static void ManageActivities()
@@ -82,7 +93,8 @@ public class ActivityManagement
         if (activities.Count == 0)
         {
             Console.WriteLine("No activities available.");
-            Pause();
+            Console.WriteLine("\nPress any key to continue...");
+            Console.ReadKey();
             return;
         }
 
@@ -97,7 +109,8 @@ public class ActivityManagement
         if (!int.TryParse(Console.ReadLine(), out int id))
         {
             Console.WriteLine("Invalid ID!");
-            Pause();
+            Console.WriteLine("\nPress any key to continue...");
+            Console.ReadKey();
             return;
         }
 
@@ -109,7 +122,8 @@ public class ActivityManagement
         if (selectedActivity == null)
         {
             Console.WriteLine("Activity not found!");
-            Pause();
+            Console.WriteLine("\nPress any key to continue...");
+            Console.ReadKey();
             return;
         }
 
@@ -151,7 +165,8 @@ public class ActivityManagement
 
                 default:
                     Console.WriteLine("Invalid option!");
-                    Pause();
+                    Console.WriteLine("\nPress any key to continue...");
+                    Console.ReadKey();
                     break;
             }
 
@@ -166,8 +181,8 @@ public class ActivityManagement
         Console.WriteLine($"Name: {activity.Name}");
         Console.WriteLine($"Description: {activity.Description}");
         Console.WriteLine($"Price: {activity.Price:C}");
-
-        Pause();
+        Console.WriteLine("\nPress any key to continue...");
+        Console.ReadKey();
     }
 
     private static void UpdateActivity(ActivityModel activity)
@@ -176,36 +191,37 @@ public class ActivityManagement
         Console.WriteLine("===== Update Activity =====");
 
         Console.Write($"New name ({activity.Name}): ");
-        string name = Console.ReadLine();
+        string name = Console.ReadLine()?.Trim();
 
         Console.Write($"New description ({activity.Description}): ");
-        string description = Console.ReadLine();
+        string description = Console.ReadLine()?.Trim();
 
         Console.Write($"New price ({activity.Price}): ");
         string priceInput = Console.ReadLine();
 
-        if (!string.IsNullOrWhiteSpace(name))
-            activity.Name = name;
-
-        if (!string.IsNullOrWhiteSpace(description))
-            activity.Description = description;
-
+        decimal updatedPrice = activity.Price;
         if (!string.IsNullOrWhiteSpace(priceInput))
         {
             if (decimal.TryParse(priceInput, out decimal price) && price >= 0)
-                activity.Price = price;
+                updatedPrice = price;
             else
             {
                 Console.WriteLine("Invalid price!");
-                Pause();
+                Console.WriteLine("\nPress any key to continue...");
+                Console.ReadKey();
                 return;
             }
         }
 
+        activity.Name = string.IsNullOrWhiteSpace(name) ? activity.Name : name;
+        activity.Description = string.IsNullOrWhiteSpace(description) ? activity.Description : description;
+        activity.Price = updatedPrice;
+
         _activityLogic.Update(activity);
 
         Console.WriteLine("\nActivity updated successfully!");
-        Pause();
+        Console.WriteLine("\nPress any key to continue...");
+        Console.ReadKey();
     }
 
     private static void DeleteActivity(ActivityModel activity)
@@ -226,13 +242,8 @@ public class ActivityManagement
         {
             Console.WriteLine("Delete cancelled.");
         }
-
-        Pause();
-    }
-
-    private static void Pause()
-    {
         Console.WriteLine("\nPress any key to continue...");
         Console.ReadKey();
     }
 }
+
