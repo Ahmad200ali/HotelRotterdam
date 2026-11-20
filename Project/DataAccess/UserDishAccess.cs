@@ -13,8 +13,17 @@ public class UserDishAccess
     public void Write(UserDishModel userDish)
     {
         string sql = $@"INSERT INTO {Table}
-                        (User_Id, Dish_Id)
-                        VALUES (@User_Id, @Dish_Id)";
+                        (User_Id, Dish_Id, ""Count"")
+                        VALUES (@User_Id, @Dish_Id, @Count)";
+
+        _connection.Execute(sql, userDish);
+    }
+
+    public void Update(UserDishModel userDish)
+    {
+        string sql = $@"UPDATE {Table}
+                        SET ""Count"" = @Count
+                        WHERE Id = @Id";
 
         _connection.Execute(sql, userDish);
     }

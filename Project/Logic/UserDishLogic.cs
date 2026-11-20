@@ -9,6 +9,11 @@ public class UserDishLogic
         _userDishAccess.Write(userDish);
     }
 
+    public void Update(UserDishModel userDish)
+    {
+        _userDishAccess.Update(userDish);
+    }
+
     public List<UserDishModel> GetAll()
     {
         return _userDishAccess.GetAll();
