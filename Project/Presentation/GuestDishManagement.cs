@@ -59,7 +59,9 @@ public class GuestDishManagement
 
         foreach (var dish in dishes)
         {
-            Console.WriteLine($"{dish.ID}. {dish.Name} - {dish.Price:C}");
+            Console.WriteLine($"{dish.ID}. {dish.Name}");
+            Console.WriteLine($"   Description: {dish.Description}");
+            Console.WriteLine($"   Price: € {dish.Price:0.00}");
         }
 
         Console.WriteLine("0. Back");
@@ -132,7 +134,7 @@ public class GuestDishManagement
         Console.WriteLine($"Name: {dish.Name}");
         Console.WriteLine($"Type: {dish.Type}");
         Console.WriteLine($"Description: {dish.Description}");
-        Console.WriteLine($"Price: {dish.Price:C}");
+        Console.WriteLine($"Price: € {dish.Price:0.00}");
 
         Pause();
     }
@@ -194,7 +196,7 @@ public class GuestDishManagement
                 Console.WriteLine($"Name: {dish.Name}");
                 Console.WriteLine($"Type: {dish.Type}");
                 Console.WriteLine($"Description: {dish.Description}");
-                Console.WriteLine($"Price: {dish.Price:C}");
+                Console.WriteLine($"Price: € {dish.Price:0.00}");
             }
         }
 
