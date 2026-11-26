@@ -41,6 +41,8 @@ public class HotelReservationMenu
         }
     }
 
+   
+
     private static void CreateReservation(UserModel guest)
     {
         Console.Clear();
@@ -61,9 +63,36 @@ public class HotelReservationMenu
 
         DisplayRooms(availableRooms);
 
-        Console.Write("\nChoose a room number: ");
+        Console.Write("\nChoose a room number, c for cheapest, or e for expensive: ");
 
-        if (!int.TryParse(Console.ReadLine(), out int choice) ||
+        string input = Console.ReadLine()?.ToLower();
+
+        if (input == "c")
+        {
+            availableRooms = availableRooms
+                .OrderBy(room => room.Price)
+                .ToList();
+
+            Console.WriteLine("\n=== Rooms: Cheapest first ===");
+            DisplayRooms(availableRooms);
+
+            Console.Write("\nChoose a room number: ");
+            input = Console.ReadLine();
+        }
+        else if (input == "e")
+        {
+            availableRooms = availableRooms
+                .OrderByDescending(room => room.Price)
+                .ToList();
+
+            Console.WriteLine("\n=== Rooms: Most expensive first ===");
+            DisplayRooms(availableRooms);
+
+            Console.Write("\nChoose a room number: ");
+            input = Console.ReadLine();
+        }
+
+        if (!int.TryParse(input, out int choice) ||
             choice < 1 || choice > availableRooms.Count)
         {
             Console.WriteLine("Invalid room selection.");
@@ -75,7 +104,6 @@ public class HotelReservationMenu
 
         int nights = (endDate.Date - startDate.Date).Days;
 
-        // multiply as decimal first, otherwise the total can become something like 2760.8900000000003
         double price = Convert.ToDouble(selectedRoom.Price * nights);
 
         Console.WriteLine("\n=== Reservation Details ===");
@@ -106,6 +134,7 @@ public class HotelReservationMenu
         Console.WriteLine("\nPress any key to continue.");
         Console.ReadKey();
     }
+
 
     private static void MyReservations(UserModel guest)
     {
@@ -193,7 +222,8 @@ public class HotelReservationMenu
         {
             Console.WriteLine($"[{i + 1}] {rooms[i].Name}");
             Console.WriteLine($"    Type: {rooms[i].Type}");
-            Console.WriteLine($"    Description: {rooms[i].Description}");
+            Console.WriteLine($"    Description:");
+            Console.WriteLine($"    {rooms[i].Description}");
             Console.WriteLine($"    Price per night: {rooms[i].Price:C}");
             Console.WriteLine();
         }
