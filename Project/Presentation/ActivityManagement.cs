@@ -85,49 +85,53 @@ public class ActivityManagement
 
     private static void ManageActivities()
     {
-        Console.Clear();
-        Console.WriteLine("===== Select an Activity =====");
-
-        var activities = _activityLogic.GetAll();
-
-        if (activities.Count == 0)
+        // after updating or deleting an activity the list of activities is shown again
+        while (true)
         {
-            Console.WriteLine("No activities available.");
-            Console.WriteLine("\nPress any key to continue...");
-            Console.ReadKey();
-            return;
+            Console.Clear();
+            Console.WriteLine("===== Select an Activity =====");
+
+            var activities = _activityLogic.GetAll();
+
+            if (activities.Count == 0)
+            {
+                Console.WriteLine("No activities available.");
+                Console.WriteLine("\nPress any key to continue...");
+                Console.ReadKey();
+                return;
+            }
+
+            foreach (var activity in activities)
+            {
+                Console.WriteLine($"{activity.ID}. {activity.Name}");
+            }
+
+            Console.WriteLine("0. Back");
+            Console.Write("\nSelect activity ID: ");
+
+            if (!int.TryParse(Console.ReadLine(), out int id))
+            {
+                Console.WriteLine("Invalid ID!");
+                Console.WriteLine("\nPress any key to continue...");
+                Console.ReadKey();
+                return;
+            }
+
+            if (id == 0)
+                return;
+
+            ActivityModel selectedActivity = _activityLogic.GetByID(id);
+
+            if (selectedActivity == null)
+            {
+                Console.WriteLine("Activity not found!");
+                Console.WriteLine("\nPress any key to continue...");
+                Console.ReadKey();
+                return;
+            }
+
+            ActivityOptions(selectedActivity);
         }
-
-        foreach (var activity in activities)
-        {
-            Console.WriteLine($"{activity.ID}. {activity.Name}");
-        }
-
-        Console.WriteLine("0. Back");
-        Console.Write("\nSelect activity ID: ");
-
-        if (!int.TryParse(Console.ReadLine(), out int id))
-        {
-            Console.WriteLine("Invalid ID!");
-            Console.WriteLine("\nPress any key to continue...");
-            Console.ReadKey();
-            return;
-        }
-
-        if (id == 0)
-            return;
-
-        ActivityModel selectedActivity = _activityLogic.GetByID(id);
-
-        if (selectedActivity == null)
-        {
-            Console.WriteLine("Activity not found!");
-            Console.WriteLine("\nPress any key to continue...");
-            Console.ReadKey();
-            return;
-        }
-
-        ActivityOptions(selectedActivity);
     }
 
     private static void ActivityOptions(ActivityModel activity)
@@ -154,7 +158,7 @@ public class ActivityManagement
 
                 case "2":
                     UpdateActivity(activity);
-                    break;
+                    return;
 
                 case "3":
                     DeleteActivity(activity);

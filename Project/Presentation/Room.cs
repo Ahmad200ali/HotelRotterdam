@@ -44,29 +44,33 @@ static class Room
 
     private static void ViewAllRooms()
     {
-        List<RoomModel> rooms = roomLogic.GetAllRooms();
-
-        if (rooms.Count == 0)
+        // after an update or delete we come back here so more rooms can be changed
+        while (true)
         {
-            Console.Clear();
-            Console.WriteLine("No rooms found.");
-            WaitForKey();
-            return;
+            List<RoomModel> rooms = roomLogic.GetAllRooms();
+
+            if (rooms.Count == 0)
+            {
+                Console.Clear();
+                Console.WriteLine("No rooms found.");
+                WaitForKey();
+                return;
+            }
+
+            List<string> options = new List<string>();
+            foreach (RoomModel room in rooms)
+            {
+                options.Add($"{room.ID}. {room.Name} | {room.Type} | {room.Price:C}");
+            }
+            options.Add("Back");
+
+            int choice = ArrowMenu.Show("All rooms (choose a room to update or delete it)", options);
+
+            if (choice == -1 || choice == rooms.Count)
+                return;
+
+            RoomOptions(rooms[choice]);
         }
-
-        List<string> options = new List<string>();
-        foreach (RoomModel room in rooms)
-        {
-            options.Add($"{room.ID}. {room.Name} | {room.Type} | {room.Price:C}");
-        }
-        options.Add("Back");
-
-        int choice = ArrowMenu.Show("All rooms (choose a room to update or delete it)", options);
-
-        if (choice == -1 || choice == rooms.Count)
-            return;
-
-        RoomOptions(rooms[choice]);
     }
 
     private static void RoomOptions(RoomModel room)
