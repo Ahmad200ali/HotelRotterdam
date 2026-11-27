@@ -14,8 +14,8 @@ public class UserDishAccess
     public void Write(UserDishModel userDish)
     {
         string sql = $@"INSERT INTO {Table}
-                        (User_Id, Dish_Id, ""Count"", Status)
-                        VALUES (@User_Id, @Dish_Id, @Count, @Status)";
+                        (User_Id, Dish_Id, ""Count"", Status, OrderedAt, Price)
+                        VALUES (@User_Id, @Dish_Id, @Count, @Status, @OrderedAt, @Price)";
 
         _connection.Execute(sql, userDish);
     }
@@ -39,7 +39,8 @@ public class UserDishAccess
 
     public List<UserDishModel> GetByUserID(long userId)
     {
-        string sql = $"SELECT * FROM {Table} WHERE User_Id = @UserId";
+        // newest orders first
+        string sql = $"SELECT * FROM {Table} WHERE User_Id = @UserId ORDER BY Id DESC";
 
         return _connection.Query<UserDishModel>(
             sql, new { UserId = userId }).ToList();

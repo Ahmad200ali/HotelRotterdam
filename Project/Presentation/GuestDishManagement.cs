@@ -141,9 +141,7 @@ public class GuestDishManagement
 
     private static void OrderDish(DishModel dish, UserModel guest)
     {
-        var orders = _userDishLogic.GetByUserID(guest.Id);
-        UserDishModel existingOrder = orders.Find(o => o.Dish_Id == dish.ID);
-        int count = existingOrder?.Count ?? 1;
+        int count = 1;
 
         DishModel currentDish = _dishLogic.GetByID(dish.ID);
 
@@ -178,17 +176,9 @@ public class GuestDishManagement
                     break;
 
                 case "2":
-                    if (existingOrder == null)
-                    {
-                        _userDishLogic.Add(new UserDishModel(0, guest.Id, dish.ID, count,"ontvangen"));
-                    }
-                    else
-                    {
-                        existingOrder.Count = count;
-                        _userDishLogic.Update(existingOrder);
-                    }
-
-                    Console.WriteLine("\nDish order placed successfully!");
+                    Console.WriteLine(_userDishLogic.PlaceOrder(guest.Id, currentDish, count)
+                        ? "\nDish order placed successfully!"
+                        : "\nCould not place the order.");
                     Pause();
                     return;
 
@@ -220,20 +210,20 @@ public class GuestDishManagement
         foreach (var order in orders)
         {
             DishModel dish = _dishLogic.GetByID(order.Dish_Id);
+            string name = dish != null ? dish.Name : "Dish no longer exists";
 
-            if (dish != null)
-            {
-                Console.WriteLine("-------------------------");
-                Console.WriteLine($"ID: {dish.ID}");
-                Console.WriteLine($"Name: {dish.Name}");
-                Console.WriteLine($"Type: {dish.Type}");
-                Console.WriteLine($"Description:");
-                Console.WriteLine($"{dish.Description}");
-                Console.WriteLine($"Count: {order.Count}");
-                Console.WriteLine($"Price: € {dish.Price:0.00}");
-                Console.WriteLine($"Status: {order.Status}");
+            // old orders have no saved price, then the current price is used
+            double price = order.Price ?? dish?.Price ?? 0;
+            string orderedAt = order.OrderedAt.HasValue
+                ? order.OrderedAt.Value.ToString("dd-MM-yyyy HH:mm")
+                : "unknown";
 
-            }
+            Console.WriteLine("-------------------------");
+            Console.WriteLine($"Ordered on: {orderedAt}");
+            Console.WriteLine($"Dish: {name}");
+            Console.WriteLine($"Count: {order.Count} x € {price:0.00}");
+            Console.WriteLine($"Total: € {order.Count * price:0.00}");
+            Console.WriteLine($"Status: {order.Status}");
         }
 
         Pause();

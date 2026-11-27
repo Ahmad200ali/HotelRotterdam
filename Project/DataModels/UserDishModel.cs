@@ -6,6 +6,12 @@ public class UserDishModel
     public int Count { get; set; } = 1;
     public string Status { get; set; }
 
+    // empty for orders that were placed before these columns existed
+    public DateTime? OrderedAt { get; set; }
+
+    // price per dish at the moment of ordering, so old orders stay correct when a price changes
+    public double? Price { get; set; }
+
     public UserDishModel() { }
 
     public UserDishModel(int id, long userId, int dishId, int count,string status)
