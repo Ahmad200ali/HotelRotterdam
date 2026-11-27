@@ -1,3 +1,4 @@
+
 using System;
 
 public class GuestActivityManagement
@@ -14,7 +15,7 @@ public class GuestActivityManagement
             Console.Clear();
             Console.WriteLine($"===== Activities - Welcome {guest.FullName} =====");
             Console.WriteLine("1. View activities");
-            Console.WriteLine("2. View my booked activities");
+            Console.WriteLine("2. View / Cancel my booked activities");
             Console.WriteLine("0. Back to guest menu");
             Console.Write("\nChoose an option: ");
 
@@ -186,6 +187,55 @@ public class GuestActivityManagement
                 Console.WriteLine($"Price: {activity.Price:C}");
             }
         }
+
+        Console.WriteLine("-------------------------");
+        Console.WriteLine("0. Back");
+        Console.Write("\nEnter an activity ID to cancel a booking: ");
+
+        if (!int.TryParse(Console.ReadLine(), out int activityId))
+        {
+            Console.WriteLine("Invalid ID!");
+            Pause();
+            return;
+        }
+
+        if (activityId == 0)
+            return;
+
+        UserActivityModel selectedBooking =
+            bookings.Find(b => b.Activity_Id == activityId);
+
+        if (selectedBooking == null)
+        {
+            Console.WriteLine("You haven't booked this activity!");
+            Pause();
+            return;
+        }
+
+        ActivityModel selectedActivity =
+            _activityLogic.GetByID(activityId);
+
+        if (selectedActivity == null)
+        {
+            Console.WriteLine("Activity not found!");
+            Pause();
+            return;
+        }
+
+        Console.Write($"\nAre you sure you want to cancel {selectedActivity.Name}? (y/n): ");
+
+        if (Console.ReadLine()?.ToLower() != "y")
+        {
+            Console.WriteLine("Cancellation aborted.");
+            Pause();
+            return;
+        }
+
+        bool success = _userActivityLogic.DeleteByID(selectedBooking.Id);
+
+        Console.WriteLine(success
+            ? "\nActivity booking successfully cancelled!"
+            : "\nCould not cancel activity booking.");
 
         Pause();
     }

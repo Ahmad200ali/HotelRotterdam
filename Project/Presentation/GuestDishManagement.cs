@@ -227,10 +227,11 @@ public class GuestDishManagement
                 Console.WriteLine($"ID: {dish.ID}");
                 Console.WriteLine($"Name: {dish.Name}");
                 Console.WriteLine($"Type: {dish.Type}");
-                Console.WriteLine($"Description: {dish.Description}");
+                Console.WriteLine($"Description:");
+                Console.WriteLine($"{dish.Description}");
                 Console.WriteLine($"Count: {order.Count}");
                 Console.WriteLine($"Price: € {dish.Price:0.00}");
-                Console.WriteLine($"Status: € {order.Status}");
+                Console.WriteLine($"Status: {order.Status}");
 
             }
         }

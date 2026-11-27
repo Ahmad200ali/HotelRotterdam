@@ -14,6 +14,7 @@ public static class GuestMenu
             Console.WriteLine("1. View the hotel floor plan");
             Console.WriteLine("2. Dishes");
             Console.WriteLine("3. Reservations");
+            Console.WriteLine("4. Activities");
             Console.WriteLine("0. Log out");
             Console.Write("Choose an option: ");
 
