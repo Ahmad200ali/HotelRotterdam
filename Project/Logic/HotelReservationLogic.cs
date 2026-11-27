@@ -1,5 +1,9 @@
 public class HotelReservationLogic
 {
+    public const string StatusReserved = "Reserved";
+    public const string StatusCheckedIn = "Checked in";
+    public const string StatusCheckedOut = "Checked out";
+
     private readonly HotelReservationAccess _access = new();
 
     public bool WriteHotelReservation(HotelReservationModel reservation)
@@ -15,6 +19,9 @@ public class HotelReservationLogic
 
         if (!_access.IsRoomAvailable(reservation.Room_Id, reservation.StartDate, reservation.EndDate))
             return false;
+
+        if (string.IsNullOrWhiteSpace(reservation.Status))
+            reservation.Status = StatusReserved;
 
         _access.Write(reservation);
         return true;
@@ -121,5 +128,47 @@ public class HotelReservationLogic
             return new List<HotelReservationModel>();
 
         return _access.GetReservationsByUserID(userId);
+    }
+
+    public List<HotelReservationModel> GetAllReservations()
+    {
+        return _access.GetAllReservations();
+    }
+
+    // a guest can only check in on a reserved booking, during the days of the stay,
+    // and only when the room is not occupied by another guest
+    public bool CheckIn(Int64 reservationId)
+    {
+        HotelReservationModel reservation = SearchHotelReservationByID(reservationId);
+
+        if (reservation == null || reservation.Status != StatusReserved)
+            return false;
+
+        if (DateTime.Today < reservation.StartDate.Date || DateTime.Today >= reservation.EndDate.Date)
+            return false;
+
+        if (_access.RoomIsOccupied(reservation.Room_Id))
+            return false;
+
+        return _access.CheckIn(reservationId);
+    }
+
+    // check out is only possible after the guest has checked in
+    public bool CheckOut(Int64 reservationId)
+    {
+        HotelReservationModel reservation = SearchHotelReservationByID(reservationId);
+
+        if (reservation == null || reservation.Status != StatusCheckedIn)
+            return false;
+
+        return _access.CheckOut(reservationId);
+    }
+
+    public bool RoomIsOccupied(Int64 roomId)
+    {
+        if (roomId <= 0)
+            return false;
+
+        return _access.RoomIsOccupied(roomId);
     }
 }

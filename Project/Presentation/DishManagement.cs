@@ -69,54 +69,60 @@ public class DishManagement
             0, name, type, description, price
         );
 
-        _dishLogic.Add(dish);
+        bool added = _dishLogic.Add(dish);
 
-        Console.WriteLine("\nDish added successfully!");
+        Console.WriteLine(added
+            ? "\nDish added successfully!"
+            : "\nCould not add the dish, a dish needs a name.");
         Pause();
     }
 
     private static void ManageDishes()
     {
-        Console.Clear();
-        Console.WriteLine("===== Select a Dish =====");
-
-        var dishes = _dishLogic.GetAll();
-
-        if (dishes.Count == 0)
+        // after updating or deleting a dish the list of dishes is shown again
+        while (true)
         {
-            Console.WriteLine("No dishes available.");
-            Pause();
-            return;
+            Console.Clear();
+            Console.WriteLine("===== Select a Dish =====");
+
+            var dishes = _dishLogic.GetAll();
+
+            if (dishes.Count == 0)
+            {
+                Console.WriteLine("No dishes available.");
+                Pause();
+                return;
+            }
+
+            foreach (var dish in dishes)
+            {
+                Console.WriteLine($"{dish.ID}. {dish.Name}");
+            }
+
+            Console.WriteLine("0. Back");
+            Console.Write("\nSelect dish ID: ");
+
+            if (!int.TryParse(Console.ReadLine(), out int id))
+            {
+                Console.WriteLine("Invalid ID!");
+                Pause();
+                return;
+            }
+
+            if (id == 0)
+                return;
+
+            DishModel selectedDish = _dishLogic.GetByID(id);
+
+            if (selectedDish == null)
+            {
+                Console.WriteLine("Dish not found!");
+                Pause();
+                return;
+            }
+
+            DishOptions(selectedDish);
         }
-
-        foreach (var dish in dishes)
-        {
-            Console.WriteLine($"{dish.ID}. {dish.Name}");
-        }
-
-        Console.WriteLine("0. Back");
-        Console.Write("\nSelect dish ID: ");
-
-        if (!int.TryParse(Console.ReadLine(), out int id))
-        {
-            Console.WriteLine("Invalid ID!");
-            Pause();
-            return;
-        }
-
-        if (id == 0)
-            return;
-
-        DishModel selectedDish = _dishLogic.GetByID(id);
-
-        if (selectedDish == null)
-        {
-            Console.WriteLine("Dish not found!");
-            Pause();
-            return;
-        }
-
-        DishOptions(selectedDish);
     }
 
     private static void DishOptions(DishModel dish)
@@ -143,7 +149,7 @@ public class DishManagement
 
                 case "2":
                     UpdateDish(dish);
-                    break;
+                    return;
 
                 case "3":
                     DeleteDish(dish);
@@ -221,9 +227,11 @@ public class DishManagement
         else if (availability?.ToLower() == "n")
             dish.IsAvailable = false;
 
-        _dishLogic.Update(dish);
+        bool updated = _dishLogic.Update(dish);
 
-        Console.WriteLine("\nDish updated successfully!");
+        Console.WriteLine(updated
+            ? "\nDish updated successfully!"
+            : "\nCould not update the dish.");
         Pause();
     }
 

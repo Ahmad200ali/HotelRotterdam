@@ -62,4 +62,21 @@ public class UserDishAccess
 
         return rowsAffected > 0;
     }
+
+    public UserDishModel GetByID(int id)
+    {
+        string sql = $"SELECT * FROM {Table} WHERE Id = @Id";
+
+        return _connection.QueryFirstOrDefault<UserDishModel>(
+            sql, new { Id = id });
+    }
+
+    public bool UpdateStatus(int id, string status)
+    {
+        string sql = $"UPDATE {Table} SET Status = @Status WHERE Id = @Id";
+
+        int rowsAffected = _connection.Execute(sql, new { Id = id, Status = status });
+
+        return rowsAffected > 0;
+    }
 }

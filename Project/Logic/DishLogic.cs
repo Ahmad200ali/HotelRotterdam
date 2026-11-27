@@ -24,14 +24,23 @@ public class DishLogic
         return _dishAccess.GetByName(name);
     }
 
-    public void Add(DishModel dish)
+    public bool Add(DishModel dish)
     {
+        // a dish needs a name
+        if (dish == null || string.IsNullOrWhiteSpace(dish.Name))
+            return false;
+
         _dishAccess.Write(dish);
+        return true;
     }
 
-    public void Update(DishModel dish)
+    public bool Update(DishModel dish)
     {
+        if (dish == null || dish.ID <= 0 || string.IsNullOrWhiteSpace(dish.Name))
+            return false;
+
         _dishAccess.Update(dish);
+        return true;
     }
 
     public bool Delete(int id)

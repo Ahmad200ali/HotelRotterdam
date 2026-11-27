@@ -22,6 +22,12 @@ public class UserAccess
         return _connection.QueryFirstOrDefault<UserModel>(sql, new { Email = email });
     }
 
+    public UserModel GetById(Int64 id)
+    {
+        string sql = $"SELECT *, email AS EmailAddress FROM {Table} WHERE id = @Id";
+        return _connection.QueryFirstOrDefault<UserModel>(sql, new { Id = id });
+    }
+
     public void Update(UserModel account)
     {
         string sql = $"UPDATE {Table} SET email = @EmailAddress, password = @Password, fullname = @FullName WHERE id = @Id";
