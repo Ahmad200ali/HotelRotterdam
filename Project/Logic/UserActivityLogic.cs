@@ -25,7 +25,7 @@ public class UserActivityLogic
         return _userActivityAccess.GetByActivityID(activityId);
     }
 
-    public bool Delete(int id)
+    public bool DeleteByID(int id)
     {
         return _userActivityAccess.DeleteByID(id);
     }
