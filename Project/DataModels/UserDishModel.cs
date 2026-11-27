@@ -5,6 +5,9 @@ public class UserDishModel
     public int Dish_Id { get; set; }
     public int Count { get; set; } = 1;
 
+    // Received, In preparation or Delivered
+    public string Status { get; set; } = "Received";
+
     public UserDishModel() { }
 
     public UserDishModel(int id, long userId, int dishId, int count = 1)
