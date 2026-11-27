@@ -8,20 +8,24 @@ public class HotelReservationAccess
 
     private string Table = "HotelReservation";
 
+    // the column names with an underscore dont match the model names so they need an alias
+    private string Columns = @"Id, User_Id, Room_Id, Start_Date AS StartDate, End_Date AS EndDate, Price,
+               COALESCE(Status, 'Reserved') AS Status,
+               CheckIn_Time AS CheckInTime, CheckOut_Time AS CheckOutTime";
+
     public void Write(HotelReservationModel reservation)
     {
         string sql = $@"
-        INSERT INTO {Table} (User_Id, Room_Id, Start_Date, End_Date, Price)
-        VALUES (@User_Id, @Room_Id, @StartDate, @EndDate, @Price)";
+        INSERT INTO {Table} (User_Id, Room_Id, Start_Date, End_Date, Price, Status)
+        VALUES (@User_Id, @Room_Id, @StartDate, @EndDate, @Price, @Status)";
 
         _connection.Execute(sql, reservation);
     }
 
     public HotelReservationModel GetHotelReservationByID(Int64 id)
     {
-        // Start_Date and End_Date dont match the model names so they need an alias
         string sql = $@"
-        SELECT Id, User_Id, Room_Id, Start_Date AS StartDate, End_Date AS EndDate, Price
+        SELECT {Columns}
         FROM {Table}
         WHERE Id = @ID";
 
@@ -106,9 +110,8 @@ public class HotelReservationAccess
 
     public List<HotelReservationModel> GetReservationsByUserID(Int64 userId)
     {
-        // Start_Date and End_Date dont match the model names so they need an alias
         string sql = $@"
-        SELECT Id, User_Id, Room_Id, Start_Date AS StartDate, End_Date AS EndDate, Price
+        SELECT {Columns}
         FROM {Table}
         WHERE User_Id = @User_Id
         ORDER BY Start_Date";
@@ -133,5 +136,57 @@ public class HotelReservationAccess
             Room_Id = roomId,
             Today = DateTime.Today.ToString("yyyy-MM-dd HH:mm:ss")
         });
+    }
+
+    public List<HotelReservationModel> GetAllReservations()
+    {
+        string sql = $@"
+        SELECT {Columns}
+        FROM {Table}
+        ORDER BY Start_Date";
+
+        return _connection.Query<HotelReservationModel>(sql).ToList();
+    }
+
+    public bool CheckIn(Int64 id)
+    {
+        string sql = $@"
+        UPDATE {Table}
+        SET Status = 'Checked in',
+            CheckIn_Time = @Now
+        WHERE Id = @Id";
+
+        int rowsAffected = _connection.Execute(sql, new
+        {
+            Id = id,
+            Now = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+        });
+
+        return rowsAffected > 0;
+    }
+
+    public bool CheckOut(Int64 id)
+    {
+        string sql = $@"
+        UPDATE {Table}
+        SET Status = 'Checked out',
+            CheckOut_Time = @Now
+        WHERE Id = @Id";
+
+        int rowsAffected = _connection.Execute(sql, new
+        {
+            Id = id,
+            Now = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+        });
+
+        return rowsAffected > 0;
+    }
+
+    // true when a guest is checked in to this room at the moment
+    public bool RoomIsOccupied(Int64 roomId)
+    {
+        string sql = $"SELECT EXISTS (SELECT 1 FROM {Table} WHERE Room_Id = @Room_Id AND Status = 'Checked in')";
+
+        return _connection.ExecuteScalar<bool>(sql, new { Room_Id = roomId });
     }
 }

@@ -21,6 +21,14 @@
         return null!;
     }
 
+    public UserModel GetUserByID(Int64 id)
+    {
+        if (id <= 0)
+            return null!;
+
+        return _access.GetById(id);
+    }
+
     public bool Register(string email, string pass, string name, string phone, string date)
     {
         UserModel? existingUser = _access.GetByEmail(email);
