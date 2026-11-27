@@ -10,26 +10,26 @@ public sealed class MenuTests
     public void AddDishWithoutName(string name)
     {
         // arrange
-        MenuLogic logic = new();
-        int count = logic.GetAllMenus().Count;
+        DishLogic logic = new();
+        int count = logic.GetAll().Count;
 
         // act
-        bool result = logic.WriteMenu(name, "Starter", "test", 5);
+        bool result = logic.Add(new DishModel(0, name, "Starter", "test", 5));
 
         // assert
         Assert.IsFalse(result);
-        Assert.AreEqual(count, logic.GetAllMenus().Count);
+        Assert.AreEqual(count, logic.GetAll().Count);
     }
 
     [TestMethod]
     public void AddAndDeleteDish()
     {
         // arrange
-        MenuLogic logic = new();
+        DishLogic logic = new();
 
         // act
-        bool added = logic.WriteMenu("Test soup", "Starter", "made by a test", 6.75);
-        MenuModel dish = logic.GetAllMenus().Last(d => d.Name == "Test soup");
+        bool added = logic.Add(new DishModel(0, "Test soup", "Starter", "made by a test", 6.75));
+        DishModel dish = logic.GetAll().Last(d => d.Name == "Test soup");
 
         // assert
         Assert.IsTrue(added);
@@ -39,27 +39,27 @@ public sealed class MenuTests
         Assert.IsTrue(dish.IsAvailable);
 
         // delete the dish again, so the database stays the same
-        Assert.IsTrue(logic.DeleteMenuByID(dish.ID));
-        Assert.IsNull(logic.SearchMenuByID(dish.ID));
+        Assert.IsTrue(logic.Delete(dish.ID));
+        Assert.IsNull(logic.GetByID(dish.ID));
     }
 
     [TestMethod]
     public void UpdateDish()
     {
         // arrange
-        MenuLogic logic = new();
-        logic.WriteMenu("Test dish update", "Starter", "old", 5);
-        MenuModel dish = logic.GetAllMenus().Last(d => d.Name == "Test dish update");
+        DishLogic logic = new();
+        logic.Add(new DishModel(0, "Test dish update", "Starter", "old", 5));
+        DishModel dish = logic.GetAll().Last(d => d.Name == "Test dish update");
 
         // act
         dish.Name = "Test dish new";
         dish.Price = 8.5;
         dish.IsAvailable = false;
-        bool updated = logic.UpdateMenu(dish);
+        bool updated = logic.Update(dish);
 
         dish.Name = "";
-        bool updatedWithoutName = logic.UpdateMenu(dish);
-        MenuModel result = logic.SearchMenuByID(dish.ID);
+        bool updatedWithoutName = logic.Update(dish);
+        DishModel result = logic.GetByID(dish.ID);
 
         // assert
         Assert.IsTrue(updated);
@@ -68,40 +68,40 @@ public sealed class MenuTests
         Assert.AreEqual(8.5, result.Price);
         Assert.IsFalse(result.IsAvailable);
 
-        logic.DeleteMenuByID(dish.ID);
+        logic.Delete(dish.ID);
     }
 
     [TestMethod]
     public void UnavailableDishIsNotShownToGuests()
     {
         // arrange
-        MenuLogic logic = new();
-        logic.WriteMenu("Test dish hidden", "Starter", "test", 5);
-        MenuModel dish = logic.GetAllMenus().Last(d => d.Name == "Test dish hidden");
+        DishLogic logic = new();
+        logic.Add(new DishModel(0, "Test dish hidden", "Starter", "test", 5));
+        DishModel dish = logic.GetAll().Last(d => d.Name == "Test dish hidden");
 
         // act
         dish.IsAvailable = false;
-        logic.UpdateMenu(dish);
+        logic.Update(dish);
 
         // assert
-        Assert.IsFalse(logic.GetAvailableMenus().Any(d => d.ID == dish.ID));
-        Assert.IsTrue(logic.GetAllMenus().Any(d => d.ID == dish.ID));
+        Assert.IsFalse(logic.GetAvailable().Any(d => d.ID == dish.ID));
+        Assert.IsTrue(logic.GetAll().Any(d => d.ID == dish.ID));
 
-        logic.DeleteMenuByID(dish.ID);
+        logic.Delete(dish.ID);
     }
 
     [TestMethod]
     public void DishTypeInUseCanNotBeDeleted()
     {
         // arrange
-        MenuLogic menuLogic = new();
+        DishLogic menuLogic = new();
         DishTypeLogic typeLogic = new();
         bool first = typeLogic.AddDishType("Test dish type");
         bool second = typeLogic.AddDishType("Test dish type");
         DishTypeModel type = typeLogic.GetAllDishTypes().Last(t => t.Name == "Test dish type");
 
-        menuLogic.WriteMenu("Test dish with type", "Test dish type", "test", 5);
-        MenuModel dish = menuLogic.GetAllMenus().Last(d => d.Name == "Test dish with type");
+        menuLogic.Add(new DishModel(0, "Test dish with type", "Test dish type", "test", 5));
+        DishModel dish = menuLogic.GetAll().Last(d => d.Name == "Test dish with type");
 
         // assert
         Assert.IsTrue(first);
@@ -110,7 +110,7 @@ public sealed class MenuTests
         Assert.IsFalse(typeLogic.DeleteDishType(type.ID));
 
         // after deleting the dish the type is not used anymore
-        menuLogic.DeleteMenuByID(dish.ID);
+        menuLogic.Delete(dish.ID);
         Assert.IsFalse(typeLogic.IsInUse(type.ID));
         Assert.IsTrue(typeLogic.DeleteDishType(type.ID));
     }
