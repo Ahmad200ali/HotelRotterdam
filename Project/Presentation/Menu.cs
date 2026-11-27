@@ -1,36 +1,26 @@
 static class Menu
-{  
+{
     static public void Start()
     {
-        bool running = true;
+        List<string> options = new List<string> { "Log in", "Create account", "Quit" };
 
         // the menu keeps coming back until the user chooses to quit
-        while (running)
+        while (true)
         {
-            Console.Clear();
-            Console.WriteLine("Enter 1 to login");
-            Console.WriteLine("Enter 2 to make account");
-            Console.WriteLine("Enter 0 to quit");
+            int choice = ArrowMenu.Show("HOTEL ROTTERDAM", options);
 
-            string input = Console.ReadLine();
-            if (input == "1")
+            switch (choice)
             {
-                Console.Clear();
-                UserLogin.Start();
-            }
-            else if (input == "2")
-            {
-                Console.Clear();
-                UserRegister.Start();
-            }
-            else if (input == "0")
-            {
-                running = false;
-            }
-            else
-            {
-                Console.WriteLine("Invalid input. Press any key to try again.");
-                Console.ReadKey();
+                case 0:
+                    Console.Clear();
+                    UserLogin.Start();
+                    break;
+                case 1:
+                    Console.Clear();
+                    UserRegister.Start();
+                    break;
+                case 2:
+                    return;
             }
         }
     }

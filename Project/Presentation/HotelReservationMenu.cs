@@ -7,36 +7,28 @@ public class HotelReservationMenu
 
     public static void Start(UserModel guest)
     {
-        bool running = true;
-
-        while (running)
+        List<string> options = new List<string>
         {
-            Console.Clear();
+            "Create reservation",
+            "My reservations",
+            "Back"
+        };
 
-            Console.WriteLine("=== Hotel Reservations ===");
-            Console.WriteLine("1. Create reservation");
-            Console.WriteLine("2. My reservations");
-            Console.WriteLine("0. Return to guest menu");
-            Console.Write("Choose an option: ");
+        while (true)
+        {
+            int choice = ArrowMenu.Show("RESERVATIONS", options);
 
-            switch (Console.ReadLine())
+            switch (choice)
             {
-                case "1":
+                case 0:
                     CreateReservation(guest);
                     break;
-
-                case "2":
+                case 1:
                     MyReservations(guest);
                     break;
-
-                case "0":
-                    running = false;
-                    break;
-
                 default:
-                    Console.WriteLine("Invalid option.");
-                    Console.ReadKey();
-                    break;
+                    // Back or Esc
+                    return;
             }
         }
     }

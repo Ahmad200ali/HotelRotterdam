@@ -8,39 +8,30 @@ public class GuestDishManagement
 
     public static void Start(UserModel guest)
     {
-        string choice;
-
-        do
+        List<string> options = new List<string>
         {
-            Console.Clear();
-            Console.WriteLine($"===== Dishes - Welcome {guest.FullName} =====");
-            Console.WriteLine("1. View available dishes");
-            Console.WriteLine("2. View my ordered dishes");
-            Console.WriteLine("0. Back to guest menu");
-            Console.Write("\nChoose an option: ");
+            "Order a dish",
+            "My orders",
+            "Back"
+        };
 
-            choice = Console.ReadLine();
+        while (true)
+        {
+            int choice = ArrowMenu.Show("ROOM SERVICE", options);
 
             switch (choice)
             {
-                case "1":
+                case 0:
                     SelectDish(guest);
                     break;
-
-                case "2":
+                case 1:
                     ViewMyDishes(guest);
                     break;
-
-                case "0":
-                    break;
-
                 default:
-                    Console.WriteLine("Invalid option!");
-                    Pause();
-                    break;
+                    // Back or Esc
+                    return;
             }
-
-        } while (choice != "0");
+        }
     }
 
     private static void SelectDish(UserModel guest)

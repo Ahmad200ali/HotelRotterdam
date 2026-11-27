@@ -5,48 +5,38 @@ public static class GuestMenu
 
     public static void Start(UserModel guest)
     {
-        bool loggedIn = true;
-
-        while (loggedIn)
+        List<string> options = new List<string>
         {
-            Console.Clear();
-            Console.WriteLine($"Welcome, {guest.FullName}");
-            Console.WriteLine("1. View the hotel floor plan");
-            Console.WriteLine("2. Dishes");
-            Console.WriteLine("3. Reservations");
-            Console.WriteLine("4. Activities");
-            Console.WriteLine("0. Log out");
-            Console.Write("Choose an option: ");
+            "Reservations",
+            "Room service",
+            "Activities",
+            "Hotel floor plan",
+            "Log out"
+        };
 
-            switch (Console.ReadLine())
+        while (true)
+        {
+            int choice = ArrowMenu.Show($"WELCOME {guest.FullName}".ToUpper().Trim(), options);
+
+            switch (choice)
             {
-                case "1":
+                case 0:
+                    HotelReservationMenu.Start(guest);
+                    break;
+                case 1:
+                    GuestDishManagement.Start(guest);
+                    break;
+                case 2:
+                    GuestActivityManagement.Start(guest);
+                    break;
+                case 3:
                     ShowFloorPlan();
                     Console.WriteLine("\nPress any key to return to the guest menu.");
                     Console.ReadKey();
                     break;
-                case "2":
-                    Console.Clear();
-                    GuestDishManagement.Start(guest);
-                    break;
-                    Console.WriteLine("\nPress any key to return to the guest menu.");
-                    Console.ReadKey();
-                    break;
-                case "3":
-                    Console.Clear();
-                    HotelReservationMenu.Start(guest);
-                    break;
-                case "4":
-                    Console.Clear();
-                    GuestActivityManagement.Start(guest);
-                    break;
-                case "0":
-                    loggedIn = false;
-                    break;
                 default:
-                    Console.WriteLine("Invalid option. Press any key to try again.");
-                    Console.ReadKey();
-                    break;
+                    // Log out or Esc
+                    return;
             }
         }
     }

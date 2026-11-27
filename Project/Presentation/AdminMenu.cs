@@ -2,40 +2,36 @@ public static class AdminMenu
 {
     public static void Start(UserModel employee)
     {
-        bool loggedIn = true;
-
-        while (loggedIn)
+        List<string> options = new List<string>
         {
-            Console.Clear();
-            Console.WriteLine($"Welcome, {employee.FullName} (Admin)");
-            Console.WriteLine("1. Manage rooms");
-            Console.WriteLine("2. Manage dishes");
-            Console.WriteLine("3. Manage Activities");
-            Console.WriteLine("4. Check-in / check-out guests");
-            Console.WriteLine("0. Log out");
-            Console.Write("Choose an option: ");
+            "Manage rooms",
+            "Manage dishes",
+            "Manage activities",
+            "Check-in / check-out guests",
+            "Log out"
+        };
 
-            switch (Console.ReadLine())
+        while (true)
+        {
+            int choice = ArrowMenu.Show($"WELCOME {employee.FullName} (ADMIN)".ToUpper(), options);
+
+            switch (choice)
             {
-                case "1":
+                case 0:
                     Room.Start();
                     break;
-                case "2":
+                case 1:
                     DishManagement.Start();
                     break;
-                case "3":
+                case 2:
                     ActivityManagement.Start();
                     break;
-                case "4":
+                case 3:
                     CheckInMenu.Start();
                     break;
-                case "0":
-                    loggedIn = false;
-                    break;
                 default:
-                    Console.WriteLine("Invalid option. Press any key to try again.");
-                    Console.ReadKey();
-                    break;
+                    // Log out or Esc
+                    return;
             }
         }
     }
