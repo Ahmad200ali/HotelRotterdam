@@ -65,11 +65,11 @@ public class GuestDishManagement
         }
 
         Console.WriteLine("0. Back");
-        Console.Write("\nSelect dish ID: ");
+        Console.Write("\nSelect number: ");
 
         if (!int.TryParse(Console.ReadLine(), out int id))
         {
-            Console.WriteLine("Invalid ID!");
+            Console.WriteLine("Invalid number!");
             Pause();
             return;
         }
@@ -180,7 +180,7 @@ public class GuestDishManagement
                 case "2":
                     if (existingOrder == null)
                     {
-                        _userDishLogic.Add(new UserDishModel(0, guest.Id, dish.ID, count));
+                        _userDishLogic.Add(new UserDishModel(0, guest.Id, dish.ID, count, UserDishLogic.StatusReceived));
                     }
                     else
                     {

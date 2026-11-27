@@ -5,16 +5,17 @@ public class UserDishModel
     public int Dish_Id { get; set; }
     public int Count { get; set; } = 1;
 
-    // Received, In preparation or Delivered
-    public string Status { get; set; } = "Received";
+    // ontvangen, in bereiding or bezorgd
+    public string Status { get; set; } = "ontvangen";
 
     public UserDishModel() { }
 
-    public UserDishModel(int id, long userId, int dishId, int count = 1)
+    public UserDishModel(int id, long userId, int dishId, int count = 1, string status = "ontvangen")
     {
         Id = id;
         User_Id = userId;
         Dish_Id = dishId;
         Count = count;
+        Status = status;
     }
 }

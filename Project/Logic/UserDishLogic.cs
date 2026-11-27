@@ -2,9 +2,9 @@ using System.Collections.Generic;
 
 public class UserDishLogic
 {
-    public const string StatusReceived = "Received";
-    public const string StatusInPreparation = "In preparation";
-    public const string StatusDelivered = "Delivered";
+    public const string StatusReceived = "ontvangen";
+    public const string StatusInPreparation = "in bereiding";
+    public const string StatusDelivered = "bezorgd";
 
     private UserDishAccess _userDishAccess = new UserDishAccess();
 
