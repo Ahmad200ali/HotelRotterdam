@@ -38,7 +38,7 @@ public sealed class UserDishCancelTests
     private int MakeOrder(long userId)
     {
         logic.Add(new UserDishModel(0, userId, dishId, 1));
-        int id = logic.GetByUserID(userId).Last().Id;
+        int id = logic.GetByUserID(userId).Where(o => o.Dish_Id == dishId).Max(o => o.Id);
         madeOrders.Add(id);
         return id;
     }
