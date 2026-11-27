@@ -7,39 +7,30 @@ public class DishManagement
 
     public static void Start()
     {
-        string choice;
-
-        do
+        List<string> options = new List<string>
         {
-            Console.Clear();
-            Console.WriteLine("===== Dish Management =====");
-            Console.WriteLine("1. Add dish");
-            Console.WriteLine("2. Manage dishes");
-            Console.WriteLine("0. Back to admin menu");
-            Console.Write("\nChoose an option: ");
+            "Add dish",
+            "Manage dishes",
+            "Back"
+        };
 
-            choice = Console.ReadLine();
+        while (true)
+        {
+            int choice = ArrowMenu.Show("DISH MANAGEMENT", options);
 
             switch (choice)
             {
-                case "1":
+                case 0:
                     AddDish();
                     break;
-
-                case "2":
+                case 1:
                     ManageDishes();
                     break;
-
-                case "0":
-                    break;
-
                 default:
-                    Console.WriteLine("Invalid option!");
-                    Pause();
-                    break;
+                    // Back or Esc
+                    return;
             }
-
-        } while (choice != "0");
+        }
     }
 
     private static void AddDish()

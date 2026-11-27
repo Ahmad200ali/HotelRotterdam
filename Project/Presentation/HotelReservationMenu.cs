@@ -7,36 +7,28 @@ public class HotelReservationMenu
 
     public static void Start(UserModel guest)
     {
-        bool running = true;
-
-        while (running)
+        List<string> options = new List<string>
         {
-            Console.Clear();
+            "Create reservation",
+            "My reservations",
+            "Back"
+        };
 
-            Console.WriteLine("=== Hotel Reservations ===");
-            Console.WriteLine("1. Create reservation");
-            Console.WriteLine("2. My reservations");
-            Console.WriteLine("0. Return to guest menu");
-            Console.Write("Choose an option: ");
+        while (true)
+        {
+            int choice = ArrowMenu.Show("RESERVATIONS", options);
 
-            switch (Console.ReadLine())
+            switch (choice)
             {
-                case "1":
+                case 0:
                     CreateReservation(guest);
                     break;
-
-                case "2":
+                case 1:
                     MyReservations(guest);
                     break;
-
-                case "0":
-                    running = false;
-                    break;
-
                 default:
-                    Console.WriteLine("Invalid option.");
-                    Console.ReadKey();
-                    break;
+                    // Back or Esc
+                    return;
             }
         }
     }
@@ -127,9 +119,24 @@ public class HotelReservationMenu
             endDate,
             price);
 
-        Console.WriteLine(success
-            ? "\nReservation successfully created!"
-            : "\nCould not create reservation.");
+        if (success)
+        {
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("=== Booking Confirmation ===");
+            Console.ResetColor();
+            Console.WriteLine("Your room is booked!\n");
+            Console.WriteLine($"Room: {selectedRoom.Name} ({selectedRoom.Type})");
+            Console.WriteLine($"Check-in: {startDate:dd-MM-yyyy}");
+            Console.WriteLine($"Check-out: {endDate:dd-MM-yyyy}");
+            Console.WriteLine($"Nights: {nights}");
+            Console.WriteLine($"Total price: {price:C}");
+            Console.WriteLine("\nYou can always find this booking under 'My reservations'.");
+        }
+        else
+        {
+            Console.WriteLine("\nCould not create reservation.");
+        }
 
         Console.WriteLine("\nPress any key to continue.");
         Console.ReadKey();
@@ -166,7 +173,7 @@ public class HotelReservationMenu
             Console.WriteLine();
         }
 
-        Console.Write("Enter a number to cancel that reservation (or press Enter to go back): ");
+        Console.Write("Enter a number to manage that reservation (or press Enter to go back): ");
         string input = Console.ReadLine() ?? "";
 
         if (string.IsNullOrWhiteSpace(input))
@@ -184,11 +191,154 @@ public class HotelReservationMenu
 
         if (selected.StartDate.Date <= DateTime.Today)
         {
-            Console.WriteLine("You can only cancel reservations that have not started yet.");
+            Console.WriteLine("You can only change or cancel reservations that have not started yet.");
             Console.ReadKey();
             return;
         }
 
+        Console.WriteLine("\n1. Change reservation");
+        Console.WriteLine("2. Cancel reservation");
+        Console.WriteLine("0. Go back");
+        Console.Write("Choose an option: ");
+
+        switch (Console.ReadLine())
+        {
+            case "1":
+                EditReservation(selected);
+                break;
+            case "2":
+                CancelReservation(selected);
+                break;
+        }
+    }
+
+    private static void EditReservation(HotelReservationModel reservation)
+    {
+        Console.Clear();
+
+        RoomModel currentRoom = _roomLogic.SearchRoomByID((int)reservation.Room_Id);
+
+        Console.WriteLine("=== Change Reservation ===\n");
+        Console.WriteLine($"Room: {(currentRoom != null ? currentRoom.Name : "Room no longer exists")}");
+        Console.WriteLine($"Check-in: {reservation.StartDate:dd-MM-yyyy}");
+        Console.WriteLine($"Check-out: {reservation.EndDate:dd-MM-yyyy}");
+        Console.WriteLine($"Total price: {reservation.Price:C}");
+        Console.WriteLine("\nPress Enter to keep the current value.\n");
+
+        if (!ReadDate("Check-in date", reservation.StartDate, out DateTime startDate) ||
+            !ReadDate("Check-out date", reservation.EndDate, out DateTime endDate))
+            return;
+
+        if (endDate.Date <= startDate.Date)
+        {
+            Console.WriteLine("Check-out has to be after check-in.");
+            Console.ReadKey();
+            return;
+        }
+
+        if (startDate.Date <= DateTime.Today)
+        {
+            Console.WriteLine("Check-in has to be after today.");
+            Console.ReadKey();
+            return;
+        }
+
+        // rooms that are free on the new dates, this reservation itself does not count
+        List<RoomModel> availableRooms = _roomLogic.GetAllRooms()
+            .Where(room => _reservationLogic.IsRoomAvailableForUpdate(
+                reservation.Id, room.ID, startDate, endDate))
+            .ToList();
+
+        if (availableRooms.Count == 0)
+        {
+            Console.WriteLine("No rooms available for these dates.");
+            Console.ReadKey();
+            return;
+        }
+
+        bool currentRoomFree = availableRooms.Any(room => room.ID == reservation.Room_Id);
+
+        DisplayRooms(availableRooms);
+
+        Console.Write(currentRoomFree
+            ? "Choose a room number (or press Enter to keep your current room): "
+            : "Your current room is not free on these dates. Choose a room number: ");
+
+        string input = Console.ReadLine() ?? "";
+        RoomModel newRoom;
+
+        if (string.IsNullOrWhiteSpace(input) && currentRoomFree)
+        {
+            newRoom = availableRooms.First(room => room.ID == reservation.Room_Id);
+        }
+        else if (int.TryParse(input, out int choice) &&
+                 choice >= 1 && choice <= availableRooms.Count)
+        {
+            newRoom = availableRooms[choice - 1];
+        }
+        else
+        {
+            Console.WriteLine("Invalid room selection.");
+            Console.ReadKey();
+            return;
+        }
+
+        int nights = (endDate.Date - startDate.Date).Days;
+        double price = Convert.ToDouble(newRoom.Price * nights);
+
+        Console.WriteLine("\n=== New Reservation Details ===");
+        Console.WriteLine($"Room: {newRoom.Name}");
+        Console.WriteLine($"Type: {newRoom.Type}");
+        Console.WriteLine($"Check-in: {startDate:dd-MM-yyyy}");
+        Console.WriteLine($"Check-out: {endDate:dd-MM-yyyy}");
+        Console.WriteLine($"Nights: {nights}");
+        Console.WriteLine($"Price per night: {newRoom.Price:C}");
+        Console.WriteLine($"Total price: {price:C} (was {reservation.Price:C})");
+
+        Console.Write("\nSave these changes? (y/n): ");
+
+        if (Console.ReadLine()?.ToLower() != "y")
+            return;
+
+        bool success = _reservationLogic.UpdateHotelReservation(
+            reservation.Id,
+            reservation.User_Id,
+            newRoom.ID,
+            startDate,
+            endDate,
+            price);
+
+        Console.WriteLine(success
+            ? "\nReservation successfully changed!"
+            : "\nCould not change the reservation.");
+
+        Console.WriteLine("\nPress any key to continue.");
+        Console.ReadKey();
+    }
+
+    // reads a date, an empty input keeps the current date
+    private static bool ReadDate(string label, DateTime current, out DateTime date)
+    {
+        Console.Write($"{label} (dd-mm-yyyy) [{current:dd-MM-yyyy}]: ");
+        string input = Console.ReadLine() ?? "";
+
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            date = current;
+            return true;
+        }
+
+        if (DateTime.TryParseExact(input.Trim(), "dd-MM-yyyy",
+            CultureInfo.InvariantCulture, DateTimeStyles.None, out date))
+            return true;
+
+        Console.WriteLine($"Invalid {label.ToLower()}.");
+        Console.ReadKey();
+        return false;
+    }
+
+    private static void CancelReservation(HotelReservationModel selected)
+    {
         Console.Write("Are you sure you want to cancel this reservation? (y/n): ");
 
         if (Console.ReadLine()?.ToLower() != "y")

@@ -8,39 +8,30 @@ public class GuestDishManagement
 
     public static void Start(UserModel guest)
     {
-        string choice;
-
-        do
+        List<string> options = new List<string>
         {
-            Console.Clear();
-            Console.WriteLine($"===== Dishes - Welcome {guest.FullName} =====");
-            Console.WriteLine("1. View available dishes");
-            Console.WriteLine("2. View my ordered dishes");
-            Console.WriteLine("0. Back to guest menu");
-            Console.Write("\nChoose an option: ");
+            "Order a dish",
+            "My orders",
+            "Back"
+        };
 
-            choice = Console.ReadLine();
+        while (true)
+        {
+            int choice = ArrowMenu.Show("ROOM SERVICE", options);
 
             switch (choice)
             {
-                case "1":
+                case 0:
                     SelectDish(guest);
                     break;
-
-                case "2":
+                case 1:
                     ViewMyDishes(guest);
                     break;
-
-                case "0":
-                    break;
-
                 default:
-                    Console.WriteLine("Invalid option!");
-                    Pause();
-                    break;
+                    // Back or Esc
+                    return;
             }
-
-        } while (choice != "0");
+        }
     }
 
     private static void SelectDish(UserModel guest)
@@ -141,9 +132,7 @@ public class GuestDishManagement
 
     private static void OrderDish(DishModel dish, UserModel guest)
     {
-        var orders = _userDishLogic.GetByUserID(guest.Id);
-        UserDishModel existingOrder = orders.Find(o => o.Dish_Id == dish.ID);
-        int count = existingOrder?.Count ?? 1;
+        int count = 1;
 
         DishModel currentDish = _dishLogic.GetByID(dish.ID);
 
@@ -178,17 +167,9 @@ public class GuestDishManagement
                     break;
 
                 case "2":
-                    if (existingOrder == null)
-                    {
-                        _userDishLogic.Add(new UserDishModel(0, guest.Id, dish.ID, count, UserDishLogic.StatusReceived));
-                    }
-                    else
-                    {
-                        existingOrder.Count = count;
-                        _userDishLogic.Update(existingOrder);
-                    }
-
-                    Console.WriteLine("\nDish order placed successfully!");
+                    Console.WriteLine(_userDishLogic.PlaceOrder(guest.Id, currentDish, count)
+                        ? "\nDish order placed successfully!"
+                        : "\nCould not place the order.");
                     Pause();
                     return;
 
@@ -225,17 +206,17 @@ public class GuestDishManagement
                 DishModel dish = _dishLogic.GetByID(orders[i].Dish_Id);
                 string dishName = dish != null ? dish.Name : "Dish no longer exists";
 
+                // old orders have no saved price, then the current price is used
+                double price = orders[i].Price ?? dish?.Price ?? 0;
+                string orderedAt = orders[i].OrderedAt.HasValue
+                    ? orders[i].OrderedAt.Value.ToString("dd-MM-yyyy HH:mm")
+                    : "unknown";
+
                 Console.WriteLine("-------------------------");
                 Console.WriteLine($"[{i + 1}] {dishName}");
-
-                if (dish != null)
-                {
-                    Console.WriteLine($"    Type: {dish.Type}");
-                    Console.WriteLine($"    Description: {dish.Description}");
-                    Console.WriteLine($"    Price: € {dish.Price:0.00}");
-                }
-
-                Console.WriteLine($"    Count: {orders[i].Count}");
+                Console.WriteLine($"    Ordered on: {orderedAt}");
+                Console.WriteLine($"    Count: {orders[i].Count} x € {price:0.00}");
+                Console.WriteLine($"    Total: € {orders[i].Count * price:0.00}");
                 Console.WriteLine($"    Status: {orders[i].Status}");
             }
 

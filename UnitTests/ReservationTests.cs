@@ -140,6 +140,82 @@ public sealed class ReservationTests
         Assert.IsTrue(roomLogic.DeleteRoomByID(room.ID));
     }
 
+    [TestMethod]
+    public void ChangeReservation()
+    {
+        // arrange
+        HotelReservationLogic logic = new();
+        RoomLogic roomLogic = new();
+        RoomModel room = AddTestRoom("Test room change");
+        RoomModel otherRoom = AddTestRoom("Test room change other");
+        Int64 userId = GetUserId();
+        DateTime today = DateTime.Today;
+
+        logic.WriteHotelReservation(userId, room.ID, today.AddDays(10), today.AddDays(13), 300);
+        HotelReservationModel reservation = logic.GetReservationsByUserID(userId)
+            .Last(r => r.Room_Id == room.ID);
+
+        // act: overlapping with its own old dates is fine
+        bool changed = logic.UpdateHotelReservation(reservation.Id, userId, room.ID,
+            today.AddDays(11), today.AddDays(15), 400);
+        HotelReservationModel updated = logic.SearchHotelReservationByID(reservation.Id);
+
+        // assert: the change is saved straight away
+        Assert.IsTrue(changed);
+        Assert.AreEqual(today.AddDays(11), updated.StartDate);
+        Assert.AreEqual(today.AddDays(15), updated.EndDate);
+        Assert.AreEqual(400, updated.Price);
+        Assert.IsTrue(logic.IsRoomAvailableForUpdate(reservation.Id, room.ID, today.AddDays(12), today.AddDays(14)));
+
+        // move it to another room, the old room is free again
+        Assert.IsTrue(logic.UpdateHotelReservation(reservation.Id, userId, otherRoom.ID,
+            today.AddDays(11), today.AddDays(15), 400));
+        Assert.AreEqual(otherRoom.ID, logic.SearchHotelReservationByID(reservation.Id).Room_Id);
+        Assert.IsTrue(logic.IsRoomAvailable(room.ID, today.AddDays(11), today.AddDays(15)));
+
+        // wrong dates are not saved
+        Assert.IsFalse(logic.UpdateHotelReservation(reservation.Id, userId, otherRoom.ID,
+            today.AddDays(15), today.AddDays(11), 400));
+        Assert.AreEqual(today.AddDays(11), logic.SearchHotelReservationByID(reservation.Id).StartDate);
+
+        logic.DeleteHotelReservationByID(reservation.Id);
+        roomLogic.DeleteRoomByID(room.ID);
+        roomLogic.DeleteRoomByID(otherRoom.ID);
+    }
+
+    [TestMethod]
+    public void ReservationCanNotBeChangedToBookedRoom()
+    {
+        // arrange
+        HotelReservationLogic logic = new();
+        RoomLogic roomLogic = new();
+        RoomModel room = AddTestRoom("Test room change booked");
+        RoomModel otherRoom = AddTestRoom("Test room change booked other");
+        Int64 userId = GetUserId();
+        DateTime today = DateTime.Today;
+
+        logic.WriteHotelReservation(userId, room.ID, today.AddDays(10), today.AddDays(13), 300);
+        logic.WriteHotelReservation(userId, otherRoom.ID, today.AddDays(10), today.AddDays(13), 300);
+        HotelReservationModel reservation = logic.GetReservationsByUserID(userId)
+            .Last(r => r.Room_Id == room.ID);
+        HotelReservationModel other = logic.GetReservationsByUserID(userId)
+            .Last(r => r.Room_Id == otherRoom.ID);
+
+        // act
+        bool changed = logic.UpdateHotelReservation(reservation.Id, userId, otherRoom.ID,
+            today.AddDays(11), today.AddDays(12), 100);
+
+        // assert: nothing changed
+        Assert.IsFalse(changed);
+        Assert.IsFalse(logic.IsRoomAvailableForUpdate(reservation.Id, otherRoom.ID, today.AddDays(11), today.AddDays(12)));
+        Assert.AreEqual(room.ID, logic.SearchHotelReservationByID(reservation.Id).Room_Id);
+
+        logic.DeleteHotelReservationByID(reservation.Id);
+        logic.DeleteHotelReservationByID(other.Id);
+        roomLogic.DeleteRoomByID(room.ID);
+        roomLogic.DeleteRoomByID(otherRoom.ID);
+    }
+
     [DataTestMethod]
     [DataRow(0)]
     [DataRow(-1)]

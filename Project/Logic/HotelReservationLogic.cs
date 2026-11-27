@@ -112,6 +112,16 @@ public class HotelReservationLogic
         return _access.IsRoomAvailable(roomId, startDate, endDate);
     }
 
+    // same as IsRoomAvailable, but the reservation that is being changed does not count
+    public bool IsRoomAvailableForUpdate(Int64 reservationId, Int64 roomId,
+                                         DateTime startDate, DateTime endDate)
+    {
+        if (reservationId <= 0 || roomId <= 0 || endDate <= startDate)
+            return false;
+
+        return _access.IsRoomAvailableForUpdate(reservationId, roomId, startDate, endDate);
+    }
+
     public List<HotelReservationModel> GetReservationsByUserID(Int64 userId)
     {
         if (userId <= 0)

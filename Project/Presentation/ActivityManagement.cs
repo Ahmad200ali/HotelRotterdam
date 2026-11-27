@@ -7,40 +7,30 @@ public class ActivityManagement
 
     public static void Start()
     {
-        string choice;
-
-        do
+        List<string> options = new List<string>
         {
-            Console.Clear();
-            Console.WriteLine("===== Activity Management =====");
-            Console.WriteLine("1. Add activity");
-            Console.WriteLine("2. Manage activities");
-            Console.WriteLine("0. Back to admin menu");
-            Console.Write("Choose an option: ");
+            "Add activity",
+            "Manage activities",
+            "Back"
+        };
 
-            choice = Console.ReadLine();
+        while (true)
+        {
+            int choice = ArrowMenu.Show("ACTIVITY MANAGEMENT", options);
 
             switch (choice)
             {
-                case "1":
+                case 0:
                     AddActivity();
                     break;
-
-                case "2":
+                case 1:
                     ManageActivities();
                     break;
-
-                case "0":
-                    break;
-
                 default:
-                    Console.WriteLine("Invalid option!");
-                    Console.WriteLine("\nPress any key to continue...");
-                    Console.ReadKey();
-                    break;
+                    // Back or Esc
+                    return;
             }
-
-        } while (choice != "0");
+        }
     }
 
     private static void AddActivity()

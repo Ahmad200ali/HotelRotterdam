@@ -8,39 +8,30 @@ public class GuestActivityManagement
 
     public static void Start(UserModel guest)
     {
-        string choice;
-
-        do
+        List<string> options = new List<string>
         {
-            Console.Clear();
-            Console.WriteLine($"===== Activities - Welcome {guest.FullName} =====");
-            Console.WriteLine("1. View activities");
-            Console.WriteLine("2. View / Cancel my booked activities");
-            Console.WriteLine("0. Back to guest menu");
-            Console.Write("\nChoose an option: ");
+            "Book an activity",
+            "My activities",
+            "Back"
+        };
 
-            choice = Console.ReadLine();
+        while (true)
+        {
+            int choice = ArrowMenu.Show("ACTIVITIES", options);
 
             switch (choice)
             {
-                case "1":
+                case 0:
                     SelectActivity(guest);
                     break;
-
-                case "2":
+                case 1:
                     ViewMyActivities(guest);
                     break;
-
-                case "0":
-                    break;
-
                 default:
-                    Console.WriteLine("Invalid option!");
-                    Pause();
-                    break;
+                    // Back or Esc
+                    return;
             }
-
-        } while (choice != "0");
+        }
     }
 
     private static void SelectActivity(UserModel guest)
