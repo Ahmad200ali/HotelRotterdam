@@ -2,6 +2,10 @@ using System.Collections.Generic;
 
 public class UserDishLogic
 {
+    public const string StatusReceived = "ontvangen";
+    public const string StatusInPreparation = "in bereiding";
+    public const string StatusDelivered = "bezorgd";
+
     private UserDishAccess _userDishAccess = new UserDishAccess();
 
     public void Add(UserDishModel userDish)
@@ -31,6 +35,40 @@ public class UserDishLogic
 
     public bool Delete(int id)
     {
+        return _userDishAccess.DeleteByID(id);
+    }
+
+    public UserDishModel GetByID(int id)
+    {
+        if (id <= 0)
+            return null;
+
+        return _userDishAccess.GetByID(id);
+    }
+
+    public bool UpdateStatus(int id, string status)
+    {
+        if (id <= 0)
+            return false;
+
+        if (status != StatusReceived && status != StatusInPreparation && status != StatusDelivered)
+            return false;
+
+        return _userDishAccess.UpdateStatus(id, status);
+    }
+
+    // a guest can only cancel his own order, as long as it is not being prepared yet
+    // (old rows without a status count as received)
+    public bool CancelOrder(int id, long userId)
+    {
+        UserDishModel order = GetByID(id);
+
+        if (order == null || order.User_Id != userId)
+            return false;
+
+        if (!string.IsNullOrEmpty(order.Status) && order.Status != StatusReceived)
+            return false;
+
         return _userDishAccess.DeleteByID(id);
     }
 }

@@ -12,6 +12,14 @@ public class HotelReservationModel
 
     public double Price { get; set; }
 
+    // Reserved, Checked in or Checked out (old rows without a status count as Reserved)
+    public string Status { get; set; } = "Reserved";
+
+    // filled in automatically when the guest checks in or out
+    public DateTime? CheckInTime { get; set; }
+
+    public DateTime? CheckOutTime { get; set; }
+
 
     public HotelReservationModel() { }
 

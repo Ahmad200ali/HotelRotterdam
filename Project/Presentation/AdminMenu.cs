@@ -11,6 +11,7 @@ public static class AdminMenu
             Console.WriteLine("1. Manage rooms");
             Console.WriteLine("2. Manage dishes");
             Console.WriteLine("3. Manage Activities");
+            Console.WriteLine("4. Check-in / check-out guests");
             Console.WriteLine("0. Log out");
             Console.Write("Choose an option: ");
 
@@ -24,6 +25,9 @@ public static class AdminMenu
                     break;
                 case "3":
                     ActivityManagement.Start();
+                    break;
+                case "4":
+                    CheckInMenu.Start();
                     break;
                 case "0":
                     loggedIn = false;

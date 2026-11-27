@@ -180,7 +180,7 @@ public class GuestDishManagement
                 case "2":
                     if (existingOrder == null)
                     {
-                        _userDishLogic.Add(new UserDishModel(0, guest.Id, dish.ID, count,"ontvangen"));
+                        _userDishLogic.Add(new UserDishModel(0, guest.Id, dish.ID, count, UserDishLogic.StatusReceived));
                     }
                     else
                     {
@@ -205,38 +205,75 @@ public class GuestDishManagement
 
     private static void ViewMyDishes(UserModel guest)
     {
-        Console.Clear();
-        Console.WriteLine("===== My Ordered Dishes =====");
-
-        var orders = _userDishLogic.GetByUserID(guest.Id);
-
-        if (orders.Count == 0)
+        // after cancelling an order the list is shown again
+        while (true)
         {
-            Console.WriteLine("You haven't ordered any dishes yet.");
-            Pause();
-            return;
-        }
+            Console.Clear();
+            Console.WriteLine("===== My Ordered Dishes =====");
 
-        foreach (var order in orders)
-        {
-            DishModel dish = _dishLogic.GetByID(order.Dish_Id);
+            var orders = _userDishLogic.GetByUserID(guest.Id);
 
-            if (dish != null)
+            if (orders.Count == 0)
             {
-                Console.WriteLine("-------------------------");
-                Console.WriteLine($"ID: {dish.ID}");
-                Console.WriteLine($"Name: {dish.Name}");
-                Console.WriteLine($"Type: {dish.Type}");
-                Console.WriteLine($"Description:");
-                Console.WriteLine($"{dish.Description}");
-                Console.WriteLine($"Count: {order.Count}");
-                Console.WriteLine($"Price: € {dish.Price:0.00}");
-                Console.WriteLine($"Status: {order.Status}");
-
+                Console.WriteLine("You haven't ordered any dishes yet.");
+                Pause();
+                return;
             }
-        }
 
-        Pause();
+            for (int i = 0; i < orders.Count; i++)
+            {
+                DishModel dish = _dishLogic.GetByID(orders[i].Dish_Id);
+                string dishName = dish != null ? dish.Name : "Dish no longer exists";
+
+                Console.WriteLine("-------------------------");
+                Console.WriteLine($"[{i + 1}] {dishName}");
+
+                if (dish != null)
+                {
+                    Console.WriteLine($"    Type: {dish.Type}");
+                    Console.WriteLine($"    Description: {dish.Description}");
+                    Console.WriteLine($"    Price: € {dish.Price:0.00}");
+                }
+
+                Console.WriteLine($"    Count: {orders[i].Count}");
+                Console.WriteLine($"    Status: {orders[i].Status}");
+            }
+
+            Console.WriteLine("-------------------------");
+            Console.Write("\nEnter a number to cancel that order (or press Enter to go back): ");
+            string input = Console.ReadLine() ?? "";
+
+            if (string.IsNullOrWhiteSpace(input))
+                return;
+
+            if (!int.TryParse(input, out int choice) || choice < 1 || choice > orders.Count)
+            {
+                Console.WriteLine("Invalid choice.");
+                Pause();
+                continue;
+            }
+
+            UserDishModel selected = orders[choice - 1];
+
+            if (!string.IsNullOrEmpty(selected.Status) && selected.Status != UserDishLogic.StatusReceived)
+            {
+                Console.WriteLine($"This order can't be cancelled anymore (status: {selected.Status}).");
+                Pause();
+                continue;
+            }
+
+            Console.Write("Are you sure you want to cancel this order? (y/n): ");
+
+            if (Console.ReadLine()?.ToLower() != "y")
+                continue;
+
+            bool cancelled = _userDishLogic.CancelOrder(selected.Id, guest.Id);
+
+            Console.WriteLine(cancelled
+                ? "\nOrder cancelled."
+                : "\nCould not cancel the order.");
+            Pause();
+        }
     }
 
     private static void Pause()
